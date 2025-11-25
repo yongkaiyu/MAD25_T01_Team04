@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">MAD25_T01_Team04</string>
+    <string name="title_activity_navigation_ui">NavigationUI</string>
 </resources>
