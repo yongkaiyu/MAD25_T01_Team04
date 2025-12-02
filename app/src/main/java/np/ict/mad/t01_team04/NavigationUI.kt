@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -25,6 +26,7 @@ import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -139,7 +141,7 @@ fun Home() {
         ) { page ->
 
             VideoPlayer(
-                url = videos[page],
+                uri = videos[page].toUri(),
                 modifier = Modifier.fillMaxSize()
             )
         }
@@ -159,8 +161,8 @@ fun Home() {
 
 @androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
 @Composable
-fun VideoPlayer(url: String, modifier: Modifier = Modifier) {
-    val uri = remember(url) { url.toUri() }
+fun VideoPlayer(uri: Uri, modifier: Modifier = Modifier) {
+    //val uri = remember(url) { url.toUri() }
     val context = LocalContext.current
     val isInEditMode = LocalView.current.isInEditMode
 
@@ -173,26 +175,51 @@ fun VideoPlayer(url: String, modifier: Modifier = Modifier) {
             }
         }
 
-        DisposableEffect(Unit) {
-            onDispose { exoPlayer.release() }
+        var isLoading by remember { mutableStateOf(true) }
+
+        DisposableEffect(exoPlayer) {
+            val listener = object : Player.Listener {
+                override fun onIsLoadingChanged(isLoadingNow: Boolean) {
+                    isLoading = isLoadingNow
+                }
+            }
+            exoPlayer.addListener(listener)
+            onDispose {
+                exoPlayer.removeListener(listener)
+                exoPlayer.release()
+            }
         }
 
-        AndroidView(
-            factory = {
-                PlayerView(it).apply {
-                    player = exoPlayer
-                    //useController = false
+        Box(modifier = modifier)
+        {
+            AndroidView(
+                factory = {
+                    PlayerView(it).apply {
+                        player = exoPlayer
+                        useController = false
 
-                    layoutParams = ViewGroup.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.MATCH_PARENT
-                    )
+                        layoutParams = ViewGroup.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.MATCH_PARENT
+                        )
 
-                    resizeMode = AspectRatioFrameLayout.RESIZE_MODE_ZOOM
-                }
-            },
-            modifier = modifier
-        )
+                        resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+                    }
+                },
+                modifier = modifier.fillMaxSize()
+            )
+
+            // --- Loading spinner ---
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .size(48.dp),
+                    color = Color.White,
+                    strokeWidth = 4.dp
+                )
+            }
+        }
     } else {
         // Preview placeholder
         Box(
