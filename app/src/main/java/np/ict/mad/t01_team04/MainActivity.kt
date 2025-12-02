@@ -1,7 +1,9 @@
 package np.ict.mad.t01_team04
 
+import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -23,12 +25,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import np.ict.mad.t01_team04.ui.theme.MAD25_T01_Team04Theme
 
 class LoginScreen : ComponentActivity() {
@@ -60,6 +65,9 @@ fun LoginScreen(
     var username by rememberSaveable { mutableStateOf("")}
     var password by rememberSaveable {mutableStateOf("")}
 
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+
     Box(
         modifier = modifier.fillMaxSize().padding(24.dp),
         contentAlignment = Alignment.Center
@@ -85,12 +93,37 @@ fun LoginScreen(
             Spacer(modifier = Modifier.padding(12.dp))
             Button(
                 onClick = {
-                    if (validateLogin(username, password)){
-                        onLoginSuccess()
+                    scope.launch {
+                        val isValid = validateLogin(context,username,password)
+                        if (isValid)
+                        {
+                            onLoginSuccess()
+                        } else {
+                            Toast.makeText(context,"Invalid Credentials", Toast.LENGTH_SHORT).show()
+                        }
                     }
                 }
             ){
                 Text(text = "Login")
+            }
+            Spacer(modifier = Modifier.padding(16.dp))
+            Button(
+                onClick = {
+                    if(username.isNotEmpty() && password.isNotEmpty()){
+                        scope.launch {
+                            val isCreated = performSignUp(context, username, password)
+                            if (isCreated) {
+                                Toast.makeText(context, "Successfully Created User!!", Toast.LENGTH_LONG).show()
+                            } else {
+                                Toast.makeText(context,"Sign Up failed!", Toast.LENGTH_LONG).show()
+                            }
+                        }
+                    } else {
+                        Toast.makeText(context,"Enter some details?", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            ) {
+                Text(text = "Sign Up")
             }
         }
 
@@ -98,8 +131,50 @@ fun LoginScreen(
 
 }
 
-fun validateLogin(username: String, password: String): Boolean{
+suspend fun performSignUp(context: Context, username: String, password: String): Boolean{
+    // Firebase
+    return FirebaseHelper().signUp(username,password)
+    // Room
+
+    /*val db = AppDatabase.getDatabase(context)
+    if (db.userDao().getUser(username) == null){
+        db.userDao().insertUser(UserEntity(username, password))
+        return true
+    }
+    return false */
+
+    // DataStore
+    //return DataStoreHelper(context).saveUser(username, password)
+    //SharedPreference
+    //val prefsHelper = SharedPreferencesHelper(context)
+    //return prefsHelper.saveUser(username, password)
+    //return false
+}
+
+suspend fun validateLogin(context: Context, username: String, password: String): Boolean{
+    // Firebase
+    return FirebaseHelper().signIn(username,password)
+
+    // Room
+    /*val user = AppDatabase.getDatabase(context).userDao().getUser(username)
+    return user!=null && user.password == password*/
+
+    // DataStore
+    //return DataStoreHelper(context).isValidUser(username,password)
+
+    //Shared Preferences
+    //val prefsHelper = SharedPreferencesHelper(context)
+    //return prefsHelper.isValidUser(username,password)
+    //return false
+
+    /*
+    val myUsername = "admin"
+    val myPassword = "password"
+    return username == myUsername && password == myPassword */
+}
+
+/* fun validateLogin(username: String, password: String): Boolean{
     val myUsername = "admin"
     val myPassword = "password"
     return username == myUsername && password == myPassword
-}
+} */
