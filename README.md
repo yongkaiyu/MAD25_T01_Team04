@@ -1,4 +1,13 @@
 ##Disclaimer
+- This is a student assignment project for the Kotlin App
+Development module at Ngee Ann Polytechnic. Developed for
+educational purposes.
+
+Collaborators
+- Yong Kai Yu (GitHub: yongkaiyu)
+- Tabio (GitHub: ITAccadh)
+- Sarrinah (GitHub: srrnh)
+- Jian Hui (GitHub: yonaginn)
 
 Introduction
 - This project is a mobile application prototype which is a personalized micro-trailer movie discovery app.
