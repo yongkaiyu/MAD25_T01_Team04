@@ -30,7 +30,10 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteDefaults
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteItemColors
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -59,12 +62,21 @@ import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
 import np.ict.mad.t01_team04.ui.theme.MAD25_T01_Team04Theme
 import androidx.core.net.toUri
+import androidx.core.view.WindowCompat
 import androidx.media3.common.util.UnstableApi
 
 class NavigationUI : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
+        WindowCompat.setDecorFitsSystemWindows(window,false)
+
+        val controller = WindowCompat.getInsetsController(window, window.decorView)
+
+        controller.isAppearanceLightStatusBars = false
+        controller.isAppearanceLightNavigationBars = false
+
         setContent {
             MAD25_T01_Team04Theme {
                 MAD25_T01_Team04App()
@@ -78,35 +90,57 @@ class NavigationUI : ComponentActivity() {
 fun MAD25_T01_Team04App() {
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
 
-    NavigationSuiteScaffold(
-        navigationSuiteItems = {
-            AppDestinations.entries.forEach {
-                item(
-                    icon = {
-                        Icon(
-                            it.icon,
-                            contentDescription = it.label
-                        )
-                    },
-                    label = { Text(it.label) },
-                    selected = it == currentDestination,
-                    onClick = { currentDestination = it }
-                )
-            }
-        }
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black)
     ) {
-        when(currentDestination){
-            AppDestinations.HOME -> Home()
-            AppDestinations.MOVIES -> GreetingPreview()
-            AppDestinations.PROFILE -> GreetingPreview()
-        }
-        /*
+
+        NavigationSuiteScaffold(
+            navigationSuiteColors = NavigationSuiteDefaults.colors(
+                navigationBarContainerColor = Color.Black,
+                navigationBarContentColor = Color.White,
+            ),
+            navigationSuiteItems = {
+                AppDestinations.entries.forEach {
+                    val selected = it == currentDestination
+
+                    item(
+                        icon = {
+                            Icon(
+                                it.icon,
+                                contentDescription = it.label,
+                                tint = if (selected) Color(0xFF9B4DFF) else Color.White
+                            )
+                        },
+                        label = { Text(it.label, color = if (selected) Color(0xFF9B4DFF) else Color.White) },
+                        selected = selected,
+                        onClick = { currentDestination = it }
+                    )
+                }
+            }
+        ) {
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .background(Color.Black)
+            )
+            {
+                when (currentDestination) {
+                    AppDestinations.HOME -> Home()
+                    AppDestinations.MOVIES -> GreetingPreview()
+                    AppDestinations.PROFILE -> GreetingPreview()
+                }
+            }
+
+            /*
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
             Greeting2(
                 name = "Android",
                 modifier = Modifier.padding(innerPadding)
             )
         } */
+        }
     }
 }
 
