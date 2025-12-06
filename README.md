@@ -4,10 +4,10 @@ Development module at Ngee Ann Polytechnic. Developed for
 educational purposes.
 
 Collaborators
-- Yong Kai Yu (GitHub: yongkaiyu)
-- Tabio (GitHub: ITAccadh)
-- Sarrinah (GitHub: srrnh)
-- Jian Hui (GitHub: yonaginn)
+- Yong Kai Yu : S10258484 (GitHub: yongkaiyu)
+- Tabio : S10258652 (GitHub: ITAccadh)
+- Sarrinah : S10241803 (GitHub: srrnh)
+- Jian Hui : S10257708 (GitHub: yonaginn)
 
 Introduction
 - This project is a mobile application prototype which is a personalized micro-trailer movie discovery app.
@@ -47,10 +47,23 @@ Tasks and features allocation of each member in team for Stage 1
 - Research on what app to do for Stage 1 (Kai Yu)
 - Conducting of user testing (Kai Yu)
 - Login Page (Kai Yu)
-- Login Database Implementation (Kai Yu)
+- Login Database Implementation using Firebase(Kai Yu)
 - Navigation UI Implementation (Kai Yu)
-- Movie Shorts Player on Home Screen (Kai Yu)
+- Movie Shorts Player Discovery Feature on Home Screen (Kai Yu)
 
 Planned Tasks and Feature Allocation for each member in Stage 2
 - Mood Movie Recommendation (Kai Yu)
+
+Application Description
+- CineXplorer is a discovery mobile application targeted towards movies. CineXplorer through its innovative features helps
+users discover more targeted movies and reduce time on choosing what movie to watch. 
+- One of CineXplorer's features helps quick discover movies through watching movie trailers in a Instagram/TikTok scrolling format.
+
+Roles & Contributions of each member for Stage 1
+- Research on what app to do for stage 1 (Kai Yu)
+- Login Page (Kai Yu)
+- Login Database Implementation using Firebase(Kai Yu)
+- Navigation UI Implementation (Kai Yu)
+- Movie Shorts Player Discovery Feature on Home Screen (Kai Yu)
+
 
