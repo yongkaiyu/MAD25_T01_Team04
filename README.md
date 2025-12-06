@@ -43,3 +43,14 @@ Declaration of LLM
 - Clarifying Android development concepts
 - Assisting in explanations regarding code logic
 
+Tasks and features allocation of each member in team for Stage 1
+- Research on what app to do for Stage 1 (Kai Yu)
+- Conducting of user testing (Kai Yu)
+- Login Page (Kai Yu)
+- Login Database Implementation (Kai Yu)
+- Navigation UI Implementation (Kai Yu)
+- Movie Shorts Player on Home Screen (Kai Yu)
+
+Planned Tasks and Feature Allocation for each member in Stage 2
+- Mood Movie Recommendation (Kai Yu)
+

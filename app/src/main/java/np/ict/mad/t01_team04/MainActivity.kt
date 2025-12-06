@@ -120,7 +120,7 @@ fun LoginScreen(
         ){
 
             Text(
-                text = "CineSwipe",
+                text = "CineXplorer",
                 fontSize = 40.sp,
                 fontWeight = FontWeight.Bold,
                 color = Color.White
