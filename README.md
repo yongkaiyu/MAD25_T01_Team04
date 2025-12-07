@@ -51,9 +51,12 @@ Tasks and features allocation of each member in team for Stage 1
 - Login Database Implementation using Firebase(Kai Yu)
 - Navigation UI Implementation (Kai Yu)
 - Movie Shorts Player Discovery Feature on Home Screen (Kai Yu)
+- ProfileUI(Nagu)
+- Login for testing(Nagu)
 
 Planned Tasks and Feature Allocation for each member in Stage 2
 - Mood Movie Recommendation (Kai Yu)
+- User Profile Customization
 
 Application Description
 - CineXplorer is a discovery mobile application targeted towards movies. CineXplorer through its innovative features helps
@@ -66,5 +69,6 @@ Roles & Contributions of each member for Stage 1
 - Login Database Implementation using Firebase(Kai Yu)
 - Navigation UI Implementation (Kai Yu)
 - Movie Shorts Player Discovery Feature on Home Screen (Kai Yu)
-
+- ProfileUI(Nagu)
+- Login for testing(Nagu)
 

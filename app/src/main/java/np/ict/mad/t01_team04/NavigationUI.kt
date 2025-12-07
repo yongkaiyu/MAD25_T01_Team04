@@ -13,6 +13,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.ScrollableDefaults
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -21,11 +23,15 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
@@ -129,7 +135,7 @@ fun MAD25_T01_Team04App() {
                 when (currentDestination) {
                     AppDestinations.HOME -> Home()
                     AppDestinations.MOVIES -> GreetingPreview()
-                    AppDestinations.PROFILE -> GreetingPreview()
+                    AppDestinations.PROFILE -> ProfileUI()
                 }
             }
 
@@ -193,7 +199,7 @@ fun Home() {
     }
 }
 
-@androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
+@androidx.annotation.OptIn(UnstableApi::class)
 @Composable
 fun VideoPlayer(uri: Uri, modifier: Modifier = Modifier) {
     //val uri = remember(url) { url.toUri() }
@@ -284,6 +290,100 @@ fun Greeting2(name: String, modifier: Modifier = Modifier) {
 fun GreetingPreview() {
     MAD25_T01_Team04Theme {
         Greeting2("Android2")
+    }
+}
+
+
+
+
+@Composable
+fun ProfileUI(
+    username: String = "GuestUser",
+    onLogout: () -> Unit = {}
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+
+            .padding(20.dp)
+    ) {
+
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+
+            // --- Profile Picture ---
+            Box(
+                modifier = Modifier
+                    .size(110.dp)
+                    .background(Color(0xFF9B4DFF), CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.AccountBox,
+                    contentDescription = "Profile Icon",
+                    tint = Color.White,
+                    modifier = Modifier.size(70.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // --- Username ---
+            Text(
+                text = username,
+                fontSize = 26.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Text(
+                text = "cinexplorer.user@app.com",
+                fontSize = 14.sp,
+                color = Color.Gray
+            )
+
+            Spacer(modifier = Modifier.height(30.dp))
+
+            // --- Settings List ---
+            ProfileOption("Saved Movies")
+            ProfileOption("My Watchlist")
+            ProfileOption("Account Settings")
+            ProfileOption("Notifications")
+            ProfileOption("Privacy & Security")
+
+            Spacer(modifier = Modifier.height(40.dp))
+
+            // --- Logout Button ---
+            Button(
+                onClick = onLogout,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF9B4DFF)
+                )
+            ) {
+                Text("Log Out")
+            }
+        }
+    }
+}
+
+@Composable
+fun ProfileOption(label: String) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 10.dp)
+            .background(Color(0xFF1A1A1A), RoundedCornerShape(12.dp))
+            .padding(16.dp)
+    ) {
+        Text(
+            text = label,
+            fontSize = 18.sp,
+            color = Color.White
+        )
     }
 }
 
