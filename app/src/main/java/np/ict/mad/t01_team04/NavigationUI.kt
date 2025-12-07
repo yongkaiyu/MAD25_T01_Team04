@@ -38,6 +38,8 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -190,7 +192,7 @@ fun MAD25_T01_Team04App(viewModel: ContentViewModel) {
                             viewModel = viewModel,
                             onItemClick = { id -> currentContentId = id }
                         )
-                        AppDestinations.PROFILE -> GreetingPreview()
+                        AppDestinations.PROFILE -> ProfileUI()
                     }
                 }
             }
@@ -515,3 +517,95 @@ fun GreetingPreview() {
     }
 }
 
+@Composable
+fun ProfileUI(
+    username: String = "GuestUser",
+    onLogout: () -> Unit = {}
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+
+            .padding(20.dp)
+    ) {
+
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+
+            Spacer(modifier = Modifier.height(60.dp))
+
+            // --- Profile Picture ---
+            Box(
+                modifier = Modifier
+                    .size(110.dp)
+                    .background(Color(0xFF9B4DFF), CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.AccountBox,
+                    contentDescription = "Profile Icon",
+                    tint = Color.White,
+                    modifier = Modifier.size(70.dp)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // --- Username ---
+            Text(
+                text = username,
+                fontSize = 26.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Text(
+                text = "cinexplorer.user@app.com",
+                fontSize = 14.sp,
+                color = Color.Gray
+            )
+
+            Spacer(modifier = Modifier.height(30.dp))
+
+            // --- Settings List ---
+            ProfileOption("Saved Movies")
+            ProfileOption("My Watchlist")
+            ProfileOption("Account Settings")
+            ProfileOption("Notifications")
+            ProfileOption("Privacy & Security")
+
+            Spacer(modifier = Modifier.height(40.dp))
+
+            // --- Logout Button ---
+            Button(
+                onClick = onLogout,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF9B4DFF)
+                )
+            ) {
+                Text("Log Out")
+            }
+        }
+    }
+}
+
+@Composable
+fun ProfileOption(label: String) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 10.dp)
+            .background(Color(0xFF1A1A1A), RoundedCornerShape(12.dp))
+            .padding(16.dp)
+    ) {
+        Text(
+            text = label,
+            fontSize = 18.sp,
+            color = Color.White
+        )
+    }
+}

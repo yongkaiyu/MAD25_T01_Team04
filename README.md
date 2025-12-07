@@ -54,6 +54,7 @@ Tasks and features allocation of each member in team for Stage 1
 - Movie Database Implementation (Kai Yu)
 - Horizontal List Trending Implementation (Kai Yu)
 - Details Page Implementation (Kai Yu)
+- Profile Page (Nagu)
 
 Planned Tasks and Feature Allocation for each member in Stage 2
 - Mood Movie Recommendation (Kai Yu)
@@ -74,5 +75,5 @@ Roles & Contributions of each member for Stage 1
 - Movie Database Implementation (Kai Yu)
 - Horizontal List Trending Implementation (Kai Yu)
 - Details Page Implementation (Kai Yu)
-
+- Profile Page (Nagu)
 
