@@ -107,5 +107,128 @@ Research Method
 
 ![img.png](img.png)
 
+Observed Behaviours
 
+- Most users browse before watching
 
+- Users are overwhelmed with options and abandon choices
+
+- Short form video consumption are preferred
+
+- Many prefer quick decisions over long browsing sessions
+
+Interview Responses
+
+- I think the YouTube and TikTok short clips help me decide faster. (P4)
+
+- Trailers are long. I think quick previews of what I am shown would be nicer to have. (P2)
+
+- I don’t think the content given to me is for me. (P5)
+
+- I always finish my food before I even chose a movie to watch. (P1)
+
+- I always take a lot of time choosing what I watch. (P8)
+
+- I would love to have a movie to watch immediately with my family. (P3)
+
+Survey Findings (24 responses)
+
+How long do you spend deciding what to watch?
+
+- 62%: 10 minutes to 25 minutes
+
+Do you feel overwhelmed by too many choices?
+
+- 75%: Yes
+
+Do current recommendations feel relevant?
+
+- 58% : No
+
+Would short previews help decide faster?
+
+- 79% : Yes
+
+Do you watch TikTok short style clips?
+
+- 2% : Frequently
+
+Do you finish full trailers?
+
+- 37% : Rarely 
+
+Findings
+
+- Majority suffers decision fatigue
+
+- High Preference for short style video
+
+- Users want faster discovery, not more content
+
+- Recommendation systems are repetitive 
+
+Competitive Observations
+
+- Netflix “Too much scrolling”, “repetitive suggestions”
+
+- YouTube: “Not organized for movies”
+
+- TikTok: “Great for fast reviews”, “not made to watch movies” 
+
+Insights from data
+
+- People send significant time relaxing using digital entertainment.
+
+- Entertainment is consistently one of the most used categories
+
+- Users frequently complain about having difficulties on choosing what to watch 
+
+Consolidated Insights
+
+Insight 1 – Decision Fatigue
+
+- Users waste time choosing what to watch and feel overwhelmed by endless options
+
+Insight 2 – Long Trailers Are Not Effective
+
+- Users prefer like short highlight clips which are the “juicy” parts than trailers
+
+Insight 3 – Irrelevant Recommendations
+
+- Users dont feel suggestions are to their tastes; want personalization
+
+Insight 4 – Short Attention Span
+
+- Short-form content (10-30 sec clips) strongly influences their decision
+
+Insight 5 – Users Want Quick, Confident Choices
+
+- They prefer simple, fast browsing over complex menus 
+
+![img_1.png](img_1.png)
+
+![img_2.png](img_2.png)
+
+![img_3.png](img_3.png)
+
+![img_4.png](img_4.png)
+
+![img_5.png](img_5.png)
+
+![img_6.png](img_6.png)
+
+Ideas:
+
+- Movie Discovery through Instagram Reels style scrolling
+
+- Mood-Based Movie Picker
+
+- Smart Playlists for Movies
+
+- Social Movie Sharing Cards
+
+- Eliminating categories Mode
+
+- Swipe-to-Discover Interface
+
+- Weekly Movie Digest 
