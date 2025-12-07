@@ -45,6 +45,7 @@ Declaration of LLM
 
 Tasks and features allocation of each member in team for Stage 1
 - Research on what app to do for Stage 1 (Kai Yu)
+- Creating and making of wireframes (Kai Yu)
 - Conducting of user testing (Kai Yu)
 - Login Page (Kai Yu)
 - Login Database Implementation using Firebase(Kai Yu)
