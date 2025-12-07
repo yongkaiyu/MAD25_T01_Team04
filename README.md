@@ -77,3 +77,35 @@ Roles & Contributions of each member for Stage 1
 - Details Page Implementation (Kai Yu)
 - Profile Page (Nagu)
 
+Research Questions
+
+- Help to explore many domains before narrowing it down.
+
+Daily Life & Pain Points
+
+- What mobile applications do users spend the most time on?
+
+- What are the most frustrating daily digital tasks?
+
+- What causes users to feel overwhelmed, lost, or unproductive?
+
+Usage
+
+- What apps do users use daily or cannot live without?
+
+- What apps did wish existed?
+
+- What problems are not solved well by current mobile applications?
+
+Research Method
+
+- User Interviews (8 pax)
+
+- Online Survey (20-30 responses)
+
+- Competitor Scan (Instagram, CapCut, Netflix, Google, WhatsApp, Shopee )
+
+![img.png](img.png)
+
+
+
