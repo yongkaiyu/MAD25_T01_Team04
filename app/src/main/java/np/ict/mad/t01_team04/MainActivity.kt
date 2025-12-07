@@ -242,7 +242,6 @@ suspend fun performSignUp(context: Context, username: String, password: String):
 suspend fun validateLogin(context: Context, username: String, password: String): Boolean{
     // Firebase
     return FirebaseHelper().signIn(username,password)
-
     // Room
     /*val user = AppDatabase.getDatabase(context).userDao().getUser(username)
     return user!=null && user.password == password*/
