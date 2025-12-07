@@ -213,7 +213,7 @@ Insight 5 – Users Want Quick, Confident Choices
 
 ![img_4.png](img_4.png)
 
-![img_9.png](img_9.png)
+![img_10.png](img_10.png)
 
 ![img_6.png](img_6.png)
 
@@ -232,3 +232,45 @@ Ideas:
 - Swipe-to-Discover Interface
 
 - Weekly Movie Digest 
+
+![img_11.png](img_11.png)
+
+![img_12.png](img_12.png)
+
+3 Iterations & Improvements
+
+Iteration 1 – Issues Found
+
+- Database movie data takes a while to load
+
+Fixes
+
+- Used Room as local caching combined with Firestore database
+
+Passing Criteria:
+
+- 80% of users should complete tasks without assistance
+
+Iteration 2 – Issues Found
+
+- Color Scheme for Login page not fitting of theme
+
+Fixes
+
+- Updated color scheme to better suit page
+
+Passing Criteria:
+
+- 90% of users should approve color scheme
+
+Iteration 3 – Issues Found
+
+- Users want clearer icons
+
+Fixes
+
+- Added clearer icons to better reflect options
+
+Passing Criteria
+
+- All users approve the new icons 
