@@ -94,58 +94,77 @@ class NavigationUI : ComponentActivity() {
 @PreviewScreenSizes
 @Composable
 fun MAD25_T01_Team04App() {
+
+    var isLoggedIn by rememberSaveable { mutableStateOf(true) }
+
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black)
-    ) {
+    if (!isLoggedIn) {
+        // Show login screen if logged out
+        LoginScreen(onLoginSuccess = { isLoggedIn = true })
+    } else {
 
-        NavigationSuiteScaffold(
-            navigationSuiteColors = NavigationSuiteDefaults.colors(
-                navigationBarContainerColor = Color.Black,
-                navigationBarContentColor = Color.White,
-            ),
-            navigationSuiteItems = {
-                AppDestinations.entries.forEach {
-                    val selected = it == currentDestination
-
-                    item(
-                        icon = {
-                            Icon(
-                                it.icon,
-                                contentDescription = it.label,
-                                tint = if (selected) Color(0xFF9B4DFF) else Color.White
-                            )
-                        },
-                        label = { Text(it.label, color = if (selected) Color(0xFF9B4DFF) else Color.White) },
-                        selected = selected,
-                        onClick = { currentDestination = it }
-                    )
-                }
-            }
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black)
         ) {
-            Box(
-                Modifier
-                    .fillMaxSize()
-                    .background(Color.Black)
-            )
-            {
-                when (currentDestination) {
-                    AppDestinations.HOME -> Home()
-                    AppDestinations.MOVIES -> GreetingPreview()
-                    AppDestinations.PROFILE -> ProfileUI()
-                }
-            }
 
-            /*
-        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-            Greeting2(
-                name = "Android",
-                modifier = Modifier.padding(innerPadding)
-            )
-        } */
+            NavigationSuiteScaffold(
+                navigationSuiteColors = NavigationSuiteDefaults.colors(
+                    navigationBarContainerColor = Color.Black,
+                    navigationBarContentColor = Color.White,
+                ),
+                navigationSuiteItems = {
+                    AppDestinations.entries.forEach {
+                        val selected = it == currentDestination
+
+                        item(
+                            icon = {
+                                Icon(
+                                    it.icon,
+                                    contentDescription = it.label,
+                                    tint = if (selected) Color(0xFF9B4DFF) else Color.White
+                                )
+                            },
+                            label = {
+                                Text(
+                                    it.label,
+                                    color = if (selected) Color(0xFF9B4DFF) else Color.White
+                                )
+                            },
+                            selected = selected,
+                            onClick = { currentDestination = it }
+                        )
+                    }
+                }
+            ) {
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .background(Color.Black)
+                )
+                {
+                    when (currentDestination) {
+                        AppDestinations.HOME -> Home()
+                        AppDestinations.MOVIES -> GreetingPreview()
+                        AppDestinations.PROFILE -> ProfileUI(
+                            username = "GuestUser",
+                            onLogout = {
+                                isLoggedIn = false // ← logout updates the state
+                            }
+                        )
+                    }
+                }
+
+                /*
+            Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                Greeting2(
+                    name = "Android",
+                    modifier = Modifier.padding(innerPadding)
+                )
+            } */
+            }
         }
     }
 }
