@@ -51,6 +51,9 @@ Tasks and features allocation of each member in team for Stage 1
 - Login Database Implementation using Firebase(Kai Yu)
 - Navigation UI Implementation (Kai Yu)
 - Movie Shorts Player Discovery Feature on Home Screen (Kai Yu)
+- Movie Database Implementation (Kai Yu)
+- Horizontal List Trending Implementation (Kai Yu)
+- Details Page Implementation (Kai Yu)
 
 Planned Tasks and Feature Allocation for each member in Stage 2
 - Mood Movie Recommendation (Kai Yu)
@@ -62,9 +65,14 @@ users discover more targeted movies and reduce time on choosing what movie to wa
 
 Roles & Contributions of each member for Stage 1
 - Research on what app to do for stage 1 (Kai Yu)
+- Creating and making of wireframes (Kai Yu)
+- Conducting of user testing (Kai Yu)
 - Login Page (Kai Yu)
 - Login Database Implementation using Firebase(Kai Yu)
 - Navigation UI Implementation (Kai Yu)
 - Movie Shorts Player Discovery Feature on Home Screen (Kai Yu)
+- Movie Database Implementation (Kai Yu)
+- Horizontal List Trending Implementation (Kai Yu)
+- Details Page Implementation (Kai Yu)
 
 

@@ -9,25 +9,39 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.ScrollableDefaults
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.VerticalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountBox
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteDefaults
@@ -36,6 +50,7 @@ import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffo
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,12 +58,16 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
@@ -63,7 +82,18 @@ import androidx.media3.ui.PlayerView
 import np.ict.mad.t01_team04.ui.theme.MAD25_T01_Team04Theme
 import androidx.core.net.toUri
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.ViewModelProvider
 import androidx.media3.common.util.UnstableApi
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.room.Room
+import coil.compose.AsyncImage
+import coil.compose.AsyncImagePainter
+import coil.compose.SubcomposeAsyncImage
+import coil.compose.SubcomposeAsyncImageContent
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
+import com.google.firebase.firestore.FirebaseFirestore
+
 
 class NavigationUI : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -77,24 +107,41 @@ class NavigationUI : ComponentActivity() {
         controller.isAppearanceLightStatusBars = false
         controller.isAppearanceLightNavigationBars = false
 
+        // --- Build Room database ---
+        val database = Room.databaseBuilder(
+            applicationContext,
+            AppDatabase::class.java,
+            "app_db"
+        ).fallbackToDestructiveMigration().build()
+
+        val dao = database.contentDao()
+
+        // --- Firestore ---
+        val firebase = FirebaseFirestore.getInstance()
+
+        // --- Repository ---
+        val repository = ContentRepository(dao, firebase)
+
+        // --- ViewModel (fixed!) ---
+        val factory = ContentViewModelFactory(repository)
+        val viewModel = ViewModelProvider(this, factory)
+            .get(ContentViewModel::class.java)
+
         setContent {
             MAD25_T01_Team04Theme {
-                MAD25_T01_Team04App()
+                MAD25_T01_Team04App(viewModel)
             }
         }
     }
 }
 
-@PreviewScreenSizes
+//@PreviewScreenSizes
 @Composable
-fun MAD25_T01_Team04App() {
+fun MAD25_T01_Team04App(viewModel: ContentViewModel) {
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black)
-    ) {
+    // Track selected content for details page
+    var currentContentId by rememberSaveable { mutableStateOf<String?>(null) }
 
         NavigationSuiteScaffold(
             navigationSuiteColors = NavigationSuiteDefaults.colors(
@@ -115,7 +162,10 @@ fun MAD25_T01_Team04App() {
                         },
                         label = { Text(it.label, color = if (selected) Color(0xFF9B4DFF) else Color.White) },
                         selected = selected,
-                        onClick = { currentDestination = it }
+                        onClick = {
+                            currentDestination = it
+                            currentContentId = null
+                        }
                     )
                 }
             }
@@ -126,10 +176,22 @@ fun MAD25_T01_Team04App() {
                     .background(Color.Black)
             )
             {
-                when (currentDestination) {
-                    AppDestinations.HOME -> Home()
-                    AppDestinations.MOVIES -> GreetingPreview()
-                    AppDestinations.PROFILE -> GreetingPreview()
+                if (currentContentId != null) {
+                    ContentDetailScreen(
+                        contentId = currentContentId!!,
+                        viewModel = viewModel,
+                        onBack = { currentContentId = null }
+
+                    )
+                } else {
+                    when (currentDestination) {
+                        AppDestinations.HOME -> Home()
+                        AppDestinations.MOVIES -> Movies(
+                            viewModel = viewModel,
+                            onItemClick = { id -> currentContentId = id }
+                        )
+                        AppDestinations.PROFILE -> GreetingPreview()
+                    }
                 }
             }
 
@@ -141,7 +203,7 @@ fun MAD25_T01_Team04App() {
             )
         } */
         }
-    }
+
 }
 
 enum class AppDestinations(
@@ -265,6 +327,172 @@ fun VideoPlayer(uri: Uri, modifier: Modifier = Modifier) {
         }
     }
 }
+
+@Composable
+fun Movies(viewModel: ContentViewModel, onItemClick: (String) -> Unit) {
+    val contentList by viewModel.contentList.collectAsState()
+
+    Column(modifier = Modifier.fillMaxSize().background(Color.Black)) {
+        // Section title
+        Spacer(modifier = Modifier.height(40.dp))
+
+        Text(
+            text = "Trending",
+            color = Color.White,
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 8.dp)
+        )
+
+        // Horizontal scroll list of content
+        LazyRow(
+            modifier = Modifier.fillMaxWidth(),
+            contentPadding = PaddingValues(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            items(contentList) { item ->
+                MovieCard(item = item, onClick = {
+                    // Navigate to details page
+                    // Pass item.id
+                    onItemClick(item.id)
+                })
+            }
+        }
+    }
+}
+
+@Composable
+fun MovieCard(item: ContentEntity, onClick: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .width(140.dp)
+            .clickable { onClick() }
+    ) {
+        Box(
+            modifier = Modifier
+                .height(200.dp)
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(8.dp))
+                .background(Color.White) // white background
+        ) {
+            if (item.thumbnailUrl.isNotEmpty()) {
+                AsyncImage(
+                    model = item.thumbnailUrl,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize(),
+                    //modifier = Modifier
+                        //.height(200.dp)
+                        //.fillMaxWidth()
+                        //.clip(RoundedCornerShape(8.dp))
+
+                )
+            } else {
+                // fallback if URL empty
+                Box(
+                    modifier = Modifier
+                        .height(200.dp)
+                        .fillMaxWidth()
+                        .background(Color.Gray)
+                        .clip(RoundedCornerShape(8.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("No Image", color = Color.White)
+                }
+            }
+        }
+
+
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = item.title,
+            color = Color.White,
+            fontSize = 14.sp,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+    }
+}
+
+@Composable
+fun ContentDetailScreen(contentId: String, viewModel: ContentViewModel, onBack: () -> Unit) {
+    val content by viewModel.getDetails(contentId).collectAsState()
+
+    if (content == null) {
+        // Loading placeholder while content is being fetched
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator(color = Color.White)
+        }
+    } else {
+        val item = content!!
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black)
+                .padding(16.dp)
+        ) {
+            Spacer(modifier = Modifier.height(40.dp))
+            IconButton(
+                onClick = { onBack() },
+                modifier = Modifier
+                    .size(40.dp)
+                    .background(Color.DarkGray.copy(alpha = 0.6f), shape = CircleShape)
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back",
+                    tint = Color.White
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = item.title,
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Use AsyncImagePainter explicitly
+            val painter = rememberAsyncImagePainter(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(item.thumbnailUrl)
+                    .crossfade(true)
+                    .build()
+            )
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(250.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .background(Color.DarkGray) // Background while loading
+            ) {
+                Image(
+                    painter = painter,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                text = item.description,
+                fontSize = 16.sp,
+                color = Color.White
+            )
+        }
+    }
+}
+
 
 @Composable
 fun isInEditMode(): Boolean {

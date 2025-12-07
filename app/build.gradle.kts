@@ -5,6 +5,9 @@ plugins {
 
     // Firebase
     id("com.google.gms.google-services")
+
+    // Room
+    id("kotlin-kapt")
 }
 
 android {
@@ -32,6 +35,7 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
@@ -57,11 +61,23 @@ dependencies {
     implementation(libs.androidx.media3.exoplayer)
     implementation(libs.androidx.media3.ui)
     implementation(libs.androidx.media3.session)
+    // For ViewModel
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
+    // For Async
+    implementation("io.coil-kt:coil-compose:2.4.0")
+    // Room
+    val roomVersion = "2.6.1"
+    implementation("androidx.room:room-runtime:$roomVersion")
+    implementation("androidx.room:room-ktx:$roomVersion")
+    kapt("androidx.room:room-compiler:$roomVersion")
+
+
 
     // Firebase
     implementation(platform("com.google.firebase:firebase-bom:33.1.0"))
     implementation("com.google.firebase:firebase-auth")
 
+    implementation ("com.google.firebase:firebase-firestore-ktx")
     implementation("com.google.accompanist:accompanist-systemuicontroller:0.34.0")
 
     testImplementation(libs.junit)
