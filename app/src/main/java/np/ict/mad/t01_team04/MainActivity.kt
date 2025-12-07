@@ -52,7 +52,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 import kotlinx.coroutines.launch
-import np.ict.mad.t01_team04.ui.theme.FakeAuth
 import np.ict.mad.t01_team04.ui.theme.MAD25_T01_Team04Theme
 
 class LoginScreen : ComponentActivity() {
@@ -243,7 +242,6 @@ suspend fun performSignUp(context: Context, username: String, password: String):
 suspend fun validateLogin(context: Context, username: String, password: String): Boolean{
     // Firebase
     return FirebaseHelper().signIn(username,password)
-    //return FakeAuth.login(username, password) //for testing
     // Room
     /*val user = AppDatabase.getDatabase(context).userDao().getUser(username)
     return user!=null && user.password == password*/
