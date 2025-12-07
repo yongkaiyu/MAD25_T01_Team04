@@ -207,7 +207,7 @@ Insight 5 – Users Want Quick, Confident Choices
 
 ![img_1.png](img_1.png)
 
-![img_2.png](img_2.png)
+![img_7.png](img_7.png)
 
 ![img_3.png](img_3.png)
 
