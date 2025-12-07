@@ -58,6 +58,7 @@ Tasks and features allocation of each member in team for Stage 1
 
 Planned Tasks and Feature Allocation for each member in Stage 2
 - Mood Movie Recommendation (Kai Yu)
+- Daily Mystery Movie
 
 Application Description
 - CineXplorer is a discovery mobile application targeted towards movies. CineXplorer through its innovative features helps
