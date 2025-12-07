@@ -190,7 +190,7 @@ fun LoginScreen(
 
             TextButton(
                 onClick = {
-                    if(username.isNotEmpty() || password.isNotEmpty()){
+                    if(username.isEmpty() || password.isEmpty()){
                         Toast.makeText(context, "Enter username/password", Toast.LENGTH_SHORT).show()
                     }
                     else {
