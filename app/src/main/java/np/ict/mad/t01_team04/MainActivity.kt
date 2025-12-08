@@ -27,6 +27,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import np.ict.mad.t01_team04.ui.theme.MAD25_T01_Team04Theme
@@ -93,12 +94,10 @@ fun LoginScreen(
                 Text(text = "Login")
             }
         }
-
     }
-
 }
 
-fun validateLogin(username: String, password: String): Boolean{
+fun validateLogin(context: String, password: String): Boolean{
     val myUsername = "admin"
     val myPassword = "password"
     return username == myUsername && password == myPassword
