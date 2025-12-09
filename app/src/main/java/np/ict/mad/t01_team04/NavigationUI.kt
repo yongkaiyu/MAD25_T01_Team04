@@ -140,10 +140,19 @@ class NavigationUI : ComponentActivity() {
 //@PreviewScreenSizes
 @Composable
 fun MAD25_T01_Team04App(viewModel: ContentViewModel) {
+
+    var isLoggedIn by rememberSaveable { mutableStateOf(true) }
+
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
 
     // Track selected content for details page
     var currentContentId by rememberSaveable { mutableStateOf<String?>(null) }
+
+
+    if (!isLoggedIn) {
+        // Show login screen if logged out
+        LoginScreen(onLoginSuccess = { isLoggedIn = true })
+    } else {
 
         NavigationSuiteScaffold(
             navigationSuiteColors = NavigationSuiteDefaults.colors(
@@ -162,7 +171,12 @@ fun MAD25_T01_Team04App(viewModel: ContentViewModel) {
                                 tint = if (selected) Color(0xFF9B4DFF) else Color.White
                             )
                         },
-                        label = { Text(it.label, color = if (selected) Color(0xFF9B4DFF) else Color.White) },
+                        label = {
+                            Text(
+                                it.label,
+                                color = if (selected) Color(0xFF9B4DFF) else Color.White
+                            )
+                        },
                         selected = selected,
                         onClick = {
                             currentDestination = it
@@ -192,19 +206,25 @@ fun MAD25_T01_Team04App(viewModel: ContentViewModel) {
                             viewModel = viewModel,
                             onItemClick = { id -> currentContentId = id }
                         )
-                        AppDestinations.PROFILE -> ProfileUI()
+                        AppDestinations.PROFILE -> ProfileUI(
+                            username = "GuestUser",
+                            onLogout = {
+                                isLoggedIn = false
+                            }
+                        )
                     }
                 }
             }
 
             /*
-        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-            Greeting2(
-                name = "Android",
-                modifier = Modifier.padding(innerPadding)
-            )
-        } */
+            Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                Greeting2(
+                    name = "Android",
+                    modifier = Modifier.padding(innerPadding)
+                )
+            } */
         }
+    }
 
 }
 
@@ -501,7 +521,7 @@ fun isInEditMode(): Boolean {
     return LocalView.current.isInEditMode
 }
 
-@Composable
+/*@Composable
 fun Greeting2(name: String, modifier: Modifier = Modifier) {
     Text(
         text = "Hello $name!",
@@ -515,7 +535,7 @@ fun GreetingPreview() {
     MAD25_T01_Team04Theme {
         Greeting2("Android2")
     }
-}
+}*/
 
 @Composable
 fun ProfileUI(
