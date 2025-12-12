@@ -2,6 +2,8 @@ package np.ict.mad.t01_team04
 
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.UserProfileChangeRequest
+import com.google.firebase.auth.userProfileChangeRequest
 import kotlinx.coroutines.tasks.await
 
 class FirebaseHelper{
@@ -20,7 +22,15 @@ class FirebaseHelper{
         return try {
             val email = toEmail(username)
             val result = auth.signInWithEmailAndPassword(email,password).await()
-            result.user!= null
+            val user = result.user
+
+            // Retrieve displayName after login
+            val displayName = user?.displayName
+            val userId = user?.uid
+            Log.d("FirebaseHelper", "Logged in as: $displayName")
+            Log.d("FirebaseHelper", "User ID: $userId")
+
+            user!= null
         } catch (e: Exception){
             Log.e("FirebaseHelper", "Login Failed!", e)
             false
@@ -31,7 +41,16 @@ class FirebaseHelper{
         return try {
             val email = toEmail(username)
             val result = auth.createUserWithEmailAndPassword(email,password).await()
-            result.user!= null
+            val user = result.user
+
+            // Set displayName
+            user?.updateProfile(
+                UserProfileChangeRequest.Builder()
+                    .setDisplayName(username)  // store the username
+                    .build()
+            )?.await()
+
+            user!= null
         } catch (e: Exception){
             Log.e("FirebaseHelper", "Sign Up Failed!", e)
             false
