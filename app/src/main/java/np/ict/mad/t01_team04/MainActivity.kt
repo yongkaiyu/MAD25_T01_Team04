@@ -51,6 +51,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
+import com.google.firebase.Firebase
 import kotlinx.coroutines.launch
 import np.ict.mad.t01_team04.ui.theme.MAD25_T01_Team04Theme
 
@@ -63,8 +64,8 @@ class LoginScreen : ComponentActivity() {
 
         val controller = WindowCompat.getInsetsController(window,window.decorView)
 
-        controller.isAppearanceLightNavigationBars = false;
-        controller.isAppearanceLightStatusBars = false;
+        controller.isAppearanceLightNavigationBars = false
+        controller.isAppearanceLightStatusBars = false
 
         setContent {
             MAD25_T01_Team04Theme {
@@ -86,7 +87,7 @@ fun LoginScreen(
     onLoginSuccess: () -> Unit,
     modifier: Modifier = Modifier
 ){
-    var username by rememberSaveable { mutableStateOf("")}
+    var usernameInput by rememberSaveable { mutableStateOf("")}
     var password by rememberSaveable {mutableStateOf("")}
 
     val scope = rememberCoroutineScope()
@@ -129,8 +130,8 @@ fun LoginScreen(
             Spacer(Modifier.height(32.dp))
 
             OutlinedTextField(
-                value = username,
-                onValueChange = {username = it},
+                value = usernameInput   ,
+                onValueChange = {usernameInput = it},
                 label = { Text(text = "Username", color = Color.White)},
                 leadingIcon = { Icon(Icons.Default.Person, contentDescription = "Username", tint = Color.White) },
                 textStyle = LocalTextStyle.current.copy(color = Color.White),
@@ -169,7 +170,7 @@ fun LoginScreen(
             Button(
                 onClick = {
                     scope.launch {
-                        val isValid = validateLogin(context,username,password)
+                        val isValid = validateLogin(context,usernameInput,password)
                         if (isValid)
                         {
                             onLoginSuccess()
@@ -190,12 +191,12 @@ fun LoginScreen(
 
             TextButton(
                 onClick = {
-                    if(username.isEmpty() || password.isEmpty()){
+                    if(usernameInput.isEmpty() || password.isEmpty()){
                         Toast.makeText(context, "Enter username/password", Toast.LENGTH_SHORT).show()
                     }
                     else {
                         scope.launch {
-                            val isCreated = performSignUp(context, username, password)
+                            val isCreated = performSignUp(context, usernameInput, password)
                             if (isCreated) {
                                 Toast.makeText(
                                     context,
