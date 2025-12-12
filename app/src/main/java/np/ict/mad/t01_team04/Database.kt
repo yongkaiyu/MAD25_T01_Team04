@@ -45,9 +45,10 @@ interface ContentDao {
     suspend fun insertAll(content: List<ContentEntity>)
 }
 
-@Database(entities = [ContentEntity::class], version = 1)
+@Database(entities = [ContentEntity::class, CommentEntity::class], version = 2)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun contentDao(): ContentDao
+    abstract fun commentDao(): CommentDao
 }
 
 class ContentViewModelFactory(
@@ -104,3 +105,5 @@ class ContentViewModel(private val repo: ContentRepository): ViewModel() {
         viewModelScope.launch { repo.sync() } // fetch & cache
     }
 }
+
+

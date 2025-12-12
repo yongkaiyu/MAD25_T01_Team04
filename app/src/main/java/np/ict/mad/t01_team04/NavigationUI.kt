@@ -38,12 +38,16 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteDefaults
@@ -206,6 +210,7 @@ fun MAD25_T01_Team04App(viewModel: ContentViewModel) {
                             viewModel = viewModel,
                             onItemClick = { id -> currentContentId = id }
                         )
+                        AppDestinations.REVIEW -> ReviewScreen(viewModel)
                         AppDestinations.PROFILE -> ProfileUI(
                             username = "GuestUser",
                             onLogout = {
@@ -233,7 +238,11 @@ enum class AppDestinations(
     val icon: ImageVector,
 ) {
     HOME("Home", Icons.Default.Home),
+
     MOVIES("Movies", Icons.Default.PlayArrow),
+
+    REVIEW("Review", Icons.Default.ThumbUp),
+
     PROFILE("Profile", Icons.Default.AccountBox),
 }
 @OptIn(ExperimentalFoundationApi::class)
@@ -515,7 +524,74 @@ fun ContentDetailScreen(contentId: String, viewModel: ContentViewModel, onBack: 
     }
 }
 
+@Composable
+fun ReviewScreen(viewModel: ContentViewModel) {
 
+    // Load movie list from Room/Firestore
+    val movieList by viewModel.contentList.collectAsState()
+
+    // Dropdown state
+    var expanded by remember { mutableStateOf(false) }
+    var selectedMovieTitle by remember { mutableStateOf("Select a Movie") }
+    var selectedMovieId by remember { mutableStateOf<String?>(null) }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black)
+            .padding(16.dp)
+    ) {
+
+        Spacer(modifier = Modifier.height(60.dp))
+
+        Text(
+            text = "Add a Comment",
+            color = Color.White,
+            fontSize = 22.sp,
+            fontWeight = FontWeight.Bold
+        )
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        // --- Movie Selector Dropdown ---
+        Box {
+            OutlinedButton(
+                onClick = { expanded = true },
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = Color.White
+                ),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(selectedMovieTitle)
+            }
+
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                movieList.forEach { movie ->
+                    DropdownMenuItem(
+                        text = { Text(movie.title) },
+                        onClick = {
+                            selectedMovieTitle = movie.title
+                            selectedMovieId = movie.id
+                            expanded = false
+                        }
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(20.dp))
+
+        // Additional UI later (comment textbox, submit button)
+        Text(
+            text = "Selected Movie ID: ${selectedMovieId ?: "None"}",
+            color = Color.Gray,
+            fontSize = 14.sp
+        )
+    }
+}
 @Composable
 fun isInEditMode(): Boolean {
     return LocalView.current.isInEditMode
