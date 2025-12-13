@@ -48,6 +48,8 @@ import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteDefaults
@@ -99,6 +101,9 @@ import coil.compose.SubcomposeAsyncImageContent
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.auth.FirebaseAuth
+import java.util.UUID
+
 
 
 class NavigationUI : ComponentActivity() {
@@ -122,20 +127,30 @@ class NavigationUI : ComponentActivity() {
 
         val dao = database.contentDao()
 
+        val commentDao = database.commentDao()
+
         // --- Firestore ---
         val firebase = FirebaseFirestore.getInstance()
 
         // --- Repository ---
         val repository = ContentRepository(dao, firebase)
 
-        // --- ViewModel (fixed!) ---
+        val commentRepository = CommentRepository(commentDao)
+
+        // --- ViewModel  ---
         val factory = ContentViewModelFactory(repository)
         val viewModel = ViewModelProvider(this, factory)
             .get(ContentViewModel::class.java)
 
+        val commentFactory = CommentViewModelFactory(commentRepository)
+
+        val commentViewModel = ViewModelProvider(this, commentFactory)
+            .get(CommentViewModel::class.java)
+
         setContent {
             MAD25_T01_Team04Theme {
-                MAD25_T01_Team04App(viewModel)
+                MAD25_T01_Team04App(
+                    viewModel, commentViewModel)
             }
         }
     }
@@ -143,7 +158,7 @@ class NavigationUI : ComponentActivity() {
 
 //@PreviewScreenSizes
 @Composable
-fun MAD25_T01_Team04App(viewModel: ContentViewModel) {
+fun MAD25_T01_Team04App(viewModel: ContentViewModel, commentViewModel: CommentViewModel) {
 
     var isLoggedIn by rememberSaveable { mutableStateOf(true) }
 
@@ -210,7 +225,7 @@ fun MAD25_T01_Team04App(viewModel: ContentViewModel) {
                             viewModel = viewModel,
                             onItemClick = { id -> currentContentId = id }
                         )
-                        AppDestinations.REVIEW -> ReviewScreen(viewModel)
+                        AppDestinations.REVIEW -> ReviewScreen(viewModel = viewModel, commentViewModel = commentViewModel)
                         AppDestinations.PROFILE -> ProfileUI(
                             username = "GuestUser",
                             onLogout = {
@@ -525,7 +540,9 @@ fun ContentDetailScreen(contentId: String, viewModel: ContentViewModel, onBack: 
 }
 
 @Composable
-fun ReviewScreen(viewModel: ContentViewModel) {
+fun ReviewScreen(
+    viewModel: ContentViewModel,
+    commentViewModel: CommentViewModel) {
 
     // Load movie list from Room/Firestore
     val movieList by viewModel.contentList.collectAsState()
@@ -534,6 +551,11 @@ fun ReviewScreen(viewModel: ContentViewModel) {
     var expanded by remember { mutableStateOf(false) }
     var selectedMovieTitle by remember { mutableStateOf("Select a Movie") }
     var selectedMovieId by remember { mutableStateOf<String?>(null) }
+    // --- Comment input state ---
+    var commentText by remember { mutableStateOf("") }
+
+    // Firebase user
+    val currentUser = FirebaseAuth.getInstance().currentUser
 
     Column(
         modifier = Modifier
@@ -590,6 +612,53 @@ fun ReviewScreen(viewModel: ContentViewModel) {
             color = Color.Gray,
             fontSize = 14.sp
         )
+
+        // --- Show ONLY after movie selected ---
+        if (selectedMovieId != null) {
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            OutlinedTextField(
+                value = commentText,
+                onValueChange = { commentText = it },
+                label = { Text("Your comment") },
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White,
+                    focusedBorderColor = Color(0xFF9B4DFF),
+                    unfocusedBorderColor = Color.Gray,
+                    focusedLabelColor = Color(0xFF9B4DFF),
+                    unfocusedLabelColor = Color.Gray
+                )
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = {
+                    if (commentText.isNotBlank() && currentUser != null) {
+
+                        val comment = CommentEntity(
+                            id = UUID.randomUUID().toString(),   // local ID (Firestore uses auto ID)
+                            userId = currentUser.uid,
+                            userName = currentUser.displayName ?: "Anonymous",
+                            movieId = selectedMovieId!!,
+                            movieName = selectedMovieTitle,
+                            comment = commentText,
+                            timestamp = System.currentTimeMillis()
+                        )
+
+                        commentViewModel.submitComment(comment)
+                        commentText = "" // clear after submit
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = commentText.isNotBlank()
+            ) {
+                Text("Submit Comment")
+            }
+        }
     }
 }
 @Composable

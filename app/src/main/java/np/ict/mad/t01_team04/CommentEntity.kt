@@ -1,10 +1,12 @@
 package np.ict.mad.t01_team04
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.room.*
 import com.google.android.gms.common.util.CollectionUtils.mapOf
 import com.google.firebase.Timestamp
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -39,6 +41,20 @@ interface CommentDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(comments: List<CommentEntity>)
 }
+
+class CommentViewModelFactory(
+    private val repository: CommentRepository
+) : ViewModelProvider.Factory {
+
+    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        if (modelClass.isAssignableFrom(CommentViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return CommentViewModel(repository) as T
+        }
+        throw IllegalArgumentException("Unknown ViewModel class")
+    }
+}
+
 
 class CommentRepository(
     private val dao: CommentDao,
@@ -77,7 +93,7 @@ class CommentRepository(
                 "movieId" to comment.movieId,
                 "movieName" to comment.movieName,
                 "comment" to comment.comment,
-                "timestamp" to Timestamp(comment.timestamp / 1000, 0) // convert millis
+                "timestamp" to FieldValue.serverTimestamp()
             )
 
             firestore.collection("comment").add(map).await()
