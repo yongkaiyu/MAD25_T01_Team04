@@ -540,6 +540,32 @@ fun ContentDetailScreen(contentId: String, viewModel: ContentViewModel, onBack: 
 }
 
 @Composable
+fun CommentItem(comment: CommentEntity) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.DarkGray.copy(alpha = 0.4f), RoundedCornerShape(8.dp))
+            .padding(12.dp)
+    ) {
+        Text(
+            text = comment.userName,
+            color = Color(0xFF9B4DFF),
+            fontWeight = FontWeight.Bold,
+            fontSize = 14.sp
+        )
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Text(
+            text = comment.comment,
+            color = Color.White,
+            fontSize = 15.sp
+        )
+    }
+}
+
+
+@Composable
 fun ReviewScreen(
     viewModel: ContentViewModel,
     commentViewModel: CommentViewModel) {
@@ -553,6 +579,15 @@ fun ReviewScreen(
     var selectedMovieId by remember { mutableStateOf<String?>(null) }
     // --- Comment input state ---
     var commentText by remember { mutableStateOf("") }
+
+    // --- Comment display state ---
+    val comments by remember(selectedMovieId) {
+        selectedMovieId?.let {
+            commentViewModel.commentsForMovie(it)
+        }
+    }?.collectAsState(initial = emptyList()) ?: remember {
+        mutableStateOf(emptyList())
+    }
 
     // Firebase user
     val currentUser = FirebaseAuth.getInstance().currentUser
@@ -659,6 +694,27 @@ fun ReviewScreen(
                 Text("Submit Comment")
             }
         }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Text(
+            text = "Comments",
+            color = Color.White,
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            items(comments) { comment ->
+                CommentItem(comment)
+            }
+        }
+
     }
 }
 @Composable
