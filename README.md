@@ -57,7 +57,10 @@ Tasks and features allocation of each member in team for Stage 1
 - Profile Page (Nagu)
 
 Planned Tasks and Feature Allocation for each member in Stage 2
-- Mood Movie Recommendation (Kai Yu)
+- Review Page and Functions (Kai Yu)
+- Delete comment
+- Comment under the content page for each movie
+- Comment top comments when there are no movie selected
 - Daily Mystery Movie
 
 Application Description
@@ -285,3 +288,4 @@ Wireframes
 ![img_15.png](img_15.png)
 
 ![img_16.png](img_16.png)
+
