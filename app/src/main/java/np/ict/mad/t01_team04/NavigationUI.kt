@@ -215,6 +215,7 @@ fun MAD25_T01_Team04App(viewModel: ContentViewModel, commentViewModel: CommentVi
                     ContentDetailScreen(
                         contentId = currentContentId!!,
                         viewModel = viewModel,
+                        commentViewModel = commentViewModel,
                         onBack = { currentContentId = null }
 
                     )
@@ -461,13 +462,21 @@ fun MovieCard(item: ContentEntity, onClick: () -> Unit) {
 }
 
 @Composable
-fun ContentDetailScreen(contentId: String, viewModel: ContentViewModel, onBack: () -> Unit) {
+fun ContentDetailScreen(contentId: String, viewModel: ContentViewModel, commentViewModel: CommentViewModel, onBack: () -> Unit) {
     // Fix flickering of white loader
     val contentFlow = remember(contentId) {
         viewModel.getDetails(contentId)
     }
 
     val content by contentFlow.collectAsState(initial = null)
+
+    val commentsFlow = remember(contentId) {
+        commentViewModel.commentsForMovie(contentId)
+    }
+
+    val comments by commentsFlow.collectAsState(initial = emptyList())
+
+    var commentText by remember { mutableStateOf("") }
 
     if (content == null) {
         // Loading placeholder while content is being fetched
@@ -540,6 +549,78 @@ fun ContentDetailScreen(contentId: String, viewModel: ContentViewModel, onBack: 
                 fontSize = 16.sp,
                 color = Color.White
             )
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            /*Text(
+                text = "Comments",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))*/
+
+            // ---- Comment input ----
+            OutlinedTextField(
+                value = commentText,
+                onValueChange = { commentText = it },
+                placeholder = { Text("Write a comment...") },
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White,
+                    focusedBorderColor = Color.White,
+                    unfocusedBorderColor = Color.Gray
+                )
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Button(
+                onClick = {
+                    val user = FirebaseAuth.getInstance().currentUser ?: return@Button
+
+                    commentViewModel.submitComment(
+                        CommentEntity(
+                            id = "",
+                            userId = user.uid,
+                            userName = user.displayName ?: "Anonymous",
+                            movieId = contentId,
+                            movieName = item.title,
+                            comment = commentText,
+                            timestamp = System.currentTimeMillis()
+                        )
+                    )
+
+                    commentText = ""
+                },
+                enabled = commentText.isNotBlank(),
+                modifier = Modifier.align(Alignment.End)
+            ) {
+                Text("Post")
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                text = "Comments",
+                color = Color.White,
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(comments) { comment ->
+                    CommentItem(comment)
+                }
+            }
+
         }
     }
 }
