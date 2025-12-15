@@ -462,7 +462,12 @@ fun MovieCard(item: ContentEntity, onClick: () -> Unit) {
 
 @Composable
 fun ContentDetailScreen(contentId: String, viewModel: ContentViewModel, onBack: () -> Unit) {
-    val content by viewModel.getDetails(contentId).collectAsState()
+    // Fix flickering of white loader
+    val contentFlow = remember(contentId) {
+        viewModel.getDetails(contentId)
+    }
+
+    val content by contentFlow.collectAsState(initial = null)
 
     if (content == null) {
         // Loading placeholder while content is being fetched
