@@ -17,7 +17,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -27,11 +26,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -47,11 +43,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
-import com.google.firebase.Firebase
 import kotlinx.coroutines.launch
 import np.ict.mad.t01_team04.ui.theme.MAD25_T01_Team04Theme
 
@@ -222,7 +216,7 @@ fun LoginScreen(
 
 suspend fun performSignUp(context: Context, username: String, password: String): Boolean{
     // Firebase
-    return FirebaseHelper().signUp(username,password)
+    return FirebaseAuthHelper().signUp(username,password)
     // Room
 
     /*val db = AppDatabase.getDatabase(context)
@@ -242,7 +236,7 @@ suspend fun performSignUp(context: Context, username: String, password: String):
 
 suspend fun validateLogin(context: Context, username: String, password: String): Boolean{
     // Firebase
-    return FirebaseHelper().signIn(username,password)
+    return FirebaseAuthHelper().signIn(username,password)
     // Room
     /*val user = AppDatabase.getDatabase(context).userDao().getUser(username)
     return user!=null && user.password == password*/

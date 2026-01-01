@@ -1,6 +1,5 @@
 package np.ict.mad.t01_team04
 
-import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -12,7 +11,6 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.PrimaryKey
 import androidx.room.Query
-import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.Flow
@@ -43,12 +41,6 @@ interface ContentDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(content: List<ContentEntity>)
-}
-
-@Database(entities = [ContentEntity::class, CommentEntity::class], version = 2)
-abstract class AppDatabase : RoomDatabase() {
-    abstract fun contentDao(): ContentDao
-    abstract fun commentDao(): CommentDao
 }
 
 class ContentViewModelFactory(
