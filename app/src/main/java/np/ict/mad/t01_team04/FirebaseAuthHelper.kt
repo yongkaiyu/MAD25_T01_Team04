@@ -3,10 +3,9 @@ package np.ict.mad.t01_team04
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.UserProfileChangeRequest
-import com.google.firebase.auth.userProfileChangeRequest
 import kotlinx.coroutines.tasks.await
 
-class FirebaseHelper{
+class FirebaseAuthHelper{
 
     private val auth: FirebaseAuth = FirebaseAuth.getInstance()
 
