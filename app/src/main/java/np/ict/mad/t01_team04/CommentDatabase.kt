@@ -21,6 +21,7 @@ data class CommentEntity(
     val movieId: String,
     val movieName: String,
     val comment: String,
+    val rating: Int,
     val timestamp: Long
 )
 
@@ -72,6 +73,7 @@ class CommentRepository(
                 movieId = doc.getString("movieId") ?: "",
                 movieName = doc.getString("movieName") ?: "",
                 comment = doc.getString("comment") ?: "",
+                rating = doc.getLong("rating")?.toInt() ?: 0,
                 timestamp = doc.getTimestamp("timestamp")?.toDate()?.time ?: 0
             )
         }
@@ -88,6 +90,7 @@ class CommentRepository(
                 "movieId" to comment.movieId,
                 "movieName" to comment.movieName,
                 "comment" to comment.comment,
+                "rating" to comment.rating,
                 "timestamp" to FieldValue.serverTimestamp()
             )
 

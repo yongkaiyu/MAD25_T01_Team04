@@ -1,20 +1,29 @@
 package np.ict.mad.t01_team04
 
+import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -25,6 +34,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -32,6 +42,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.firebase.auth.FirebaseAuth
 import java.util.UUID
+import kotlin.math.roundToInt
 
 @Composable
 fun ReviewScreen(
@@ -48,6 +59,8 @@ fun ReviewScreen(
     // --- Comment input state ---
     var commentText by remember { mutableStateOf("") }
 
+    var rating by remember { mutableStateOf(0) }
+
     // --- Comment display state ---
     val comments by remember(selectedMovieId) {
         selectedMovieId?.let {
@@ -55,6 +68,14 @@ fun ReviewScreen(
         }
     }?.collectAsState(initial = emptyList()) ?: remember {
         mutableStateOf(emptyList())
+    }
+
+    val averageRating = remember(comments) {
+        if (comments.isNotEmpty()) {
+            comments.map { it.rating }.average()
+        } else {
+            0.0
+        }
     }
 
     // Firebase user
@@ -121,6 +142,50 @@ fun ReviewScreen(
 
             Spacer(modifier = Modifier.height(20.dp))
 
+            Text(
+                text = "Average Rating",
+                color = Color.White,
+                fontSize = 14.sp
+            )
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                repeat(5) { index ->
+                    Icon(
+                        imageVector = Icons.Filled.Star,
+                        contentDescription = null,
+                        tint = if (index < averageRating.roundToInt())
+                            Color(0xFFFFC107)
+                        else
+                            Color.Transparent,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Text(
+                    text = String.format("%.1f / 5", averageRating),
+                    color = Color.White,
+                    fontSize = 12.sp
+                )
+            }
+
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Text(
+                text = "Your Rating",
+                color = Color.White,
+                fontSize = 14.sp
+            )
+
+            StarRatingInput(
+                rating = rating,
+                onRatingChanged = { rating = it }
+            )
+
             OutlinedTextField(
                 value = commentText,
                 onValueChange = { commentText = it },
@@ -140,7 +205,7 @@ fun ReviewScreen(
 
             Button(
                 onClick = {
-                    if (commentText.isNotBlank() && currentUser != null) {
+                    if (commentText.isNotBlank() && currentUser != null && rating > 0) {
 
                         val comment = CommentEntity(
                             id = UUID.randomUUID().toString(),   // local ID (Firestore uses auto ID)
@@ -149,15 +214,17 @@ fun ReviewScreen(
                             movieId = selectedMovieId!!,
                             movieName = selectedMovieTitle,
                             comment = commentText,
+                            rating = rating,
                             timestamp = System.currentTimeMillis()
                         )
 
                         commentViewModel.submitComment(comment)
                         commentText = "" // clear after submit
+                        rating = 0
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
-                enabled = commentText.isNotBlank()
+                enabled = commentText.isNotBlank() && rating > 0
             ) {
                 Text("Submit Comment")
             }
@@ -178,10 +245,38 @@ fun ReviewScreen(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(comments) { comment ->
+            items(comments, key = { it.id }) { comment ->
+                Log.d("RATING_DEBUG", "rating=${comment.rating}")
                 CommentItem(comment)
             }
         }
 
+    }
+}
+
+@Composable
+fun StarRatingInput(
+    rating: Int,                  // 0..5
+    onRatingChanged: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(modifier = modifier) {
+        repeat(5) { index ->
+            val starValue = index + 1
+
+            Icon(
+                imageVector = Icons.Filled.Star,
+                contentDescription = "Rate $starValue stars",
+                tint = if (index < rating)
+                    Color(0xFFFFC107)
+                else
+                    Color.Gray.copy(alpha = 0.4f),
+                modifier = Modifier
+                    .size(32.dp)
+                    .clickable {
+                        onRatingChanged(starValue) // 1..5
+                    }
+            )
+        }
     }
 }

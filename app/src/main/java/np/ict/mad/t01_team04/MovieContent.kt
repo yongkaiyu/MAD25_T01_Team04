@@ -2,9 +2,11 @@ package np.ict.mad.t01_team04
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,6 +19,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -27,6 +30,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -59,6 +63,8 @@ fun ContentDetailScreen(contentId: String, viewModel: ContentViewModel, commentV
     val comments by commentsFlow.collectAsState(initial = emptyList())
 
     var commentText by remember { mutableStateOf("") }
+
+    var rating by remember { mutableIntStateOf(0) }
 
     if (content == null) {
         // Loading placeholder while content is being fetched
@@ -143,6 +149,21 @@ fun ContentDetailScreen(contentId: String, viewModel: ContentViewModel, commentV
 
             Spacer(modifier = Modifier.height(12.dp))*/
 
+            Text(
+                text = "Your Rating",
+                color = Color.White,
+                fontSize = 14.sp
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            StarRatingSelector(
+                rating = rating,
+                onRatingSelected = { rating = it }
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
             // ---- Comment input ----
             OutlinedTextField(
                 value = commentText,
@@ -171,11 +192,13 @@ fun ContentDetailScreen(contentId: String, viewModel: ContentViewModel, commentV
                             movieId = contentId,
                             movieName = item.title,
                             comment = commentText,
+                            rating = rating,
                             timestamp = System.currentTimeMillis()
                         )
                     )
 
                     commentText = ""
+                    rating = 0
                 },
                 enabled = commentText.isNotBlank(),
                 modifier = Modifier.align(Alignment.End)
@@ -198,7 +221,7 @@ fun ContentDetailScreen(contentId: String, viewModel: ContentViewModel, commentV
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                items(comments) { comment ->
+                items(comments, key = { it.id }) { comment ->
                     CommentItem(comment)
                 }
             }
@@ -206,3 +229,32 @@ fun ContentDetailScreen(contentId: String, viewModel: ContentViewModel, commentV
         }
     }
 }
+
+@Composable
+fun StarRatingSelector(
+    rating: Int,                  // 0..5
+    onRatingSelected: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(modifier = modifier) {
+        repeat(5) { index ->
+            val starValue = index + 1
+
+            Icon(
+                imageVector = Icons.Filled.Star,
+                contentDescription = "Star $starValue",
+                tint = if (index < rating)
+                    Color(0xFFFFC107)
+                else
+                    Color.Gray.copy(alpha = 0.4f),
+                modifier = Modifier
+                    .size(28.dp)
+                    .clickable {
+                        onRatingSelected(starValue) // 1..5
+                    }
+            )
+        }
+    }
+}
+
+
