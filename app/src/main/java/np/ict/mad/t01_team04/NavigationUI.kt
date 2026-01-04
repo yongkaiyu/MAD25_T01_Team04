@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -38,7 +39,9 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.ThumbUp
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -280,6 +283,10 @@ fun CommentItem(comment: CommentEntity) {
 
         Spacer(modifier = Modifier.height(4.dp))
 
+        ReadOnlyStarRating(rating = comment.rating)
+
+        Spacer(modifier = Modifier.height(4.dp))
+
         Text(
             text = comment.comment,
             color = Color.White,
@@ -287,6 +294,28 @@ fun CommentItem(comment: CommentEntity) {
         )
     }
 }
+
+@Composable
+fun ReadOnlyStarRating(
+    rating: Int,
+    modifier: Modifier = Modifier
+) {
+    Row(modifier = modifier) {
+        repeat(5) { index ->
+            Icon(
+                imageVector = Icons.Filled.Star,
+                contentDescription = null,
+                tint = if (index < rating)
+                    Color(0xFFFFC107)
+                else
+                    Color.Transparent,
+                modifier = Modifier.size(18.dp)
+            )
+        }
+    }
+}
+
+
 
 
 
