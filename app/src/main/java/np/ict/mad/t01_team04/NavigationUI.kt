@@ -36,6 +36,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.PlayArrow
@@ -103,6 +104,7 @@ import coil.compose.SubcomposeAsyncImage
 import coil.compose.SubcomposeAsyncImageContent
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
+import com.google.firebase.Firebase
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.auth.FirebaseAuth
 import java.util.UUID
@@ -267,19 +269,40 @@ enum class AppDestinations(
 
 
 @Composable
-fun CommentItem(comment: CommentEntity) {
+fun CommentItem(
+    comment: CommentEntity,
+    onDelete: (String) -> Unit) {
+
+    val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
+    val isOwner = comment.userId == currentUserId
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .background(Color.DarkGray.copy(alpha = 0.4f), RoundedCornerShape(8.dp))
             .padding(12.dp)
     ) {
-        Text(
-            text = comment.userName,
-            color = Color(0xFF9B4DFF),
-            fontWeight = FontWeight.Bold,
-            fontSize = 14.sp
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = comment.userName,
+                color = Color.White,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.weight(1f)
+            )
+
+            // Delete icon (only owner)
+            if (isOwner) {
+                IconButton(onClick = { onDelete(comment.id) }) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Delete Comment",
+                        tint = Color.Red
+                    )
+                }
+            }
+        }
 
         Spacer(modifier = Modifier.height(4.dp))
 
