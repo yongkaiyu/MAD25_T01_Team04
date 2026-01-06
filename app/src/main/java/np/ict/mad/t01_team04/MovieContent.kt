@@ -222,7 +222,12 @@ fun ContentDetailScreen(contentId: String, viewModel: ContentViewModel, commentV
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(comments, key = { it.id }) { comment ->
-                    CommentItem(comment)
+                    CommentItem(
+                        comment = comment,
+                        onDelete = { commentId ->
+                            commentViewModel.deleteComment(commentId)
+                        }
+                    )
                 }
             }
 

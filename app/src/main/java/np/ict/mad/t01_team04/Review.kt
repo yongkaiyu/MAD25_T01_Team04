@@ -247,7 +247,12 @@ fun ReviewScreen(
         ) {
             items(comments, key = { it.id }) { comment ->
                 Log.d("RATING_DEBUG", "rating=${comment.rating}")
-                CommentItem(comment)
+                CommentItem(
+                    comment = comment,
+                    onDelete = { commentId ->
+                        commentViewModel.deleteComment(commentId)
+                    }
+                )
             }
         }
 

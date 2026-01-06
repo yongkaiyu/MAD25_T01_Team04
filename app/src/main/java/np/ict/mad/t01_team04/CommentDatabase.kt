@@ -34,6 +34,10 @@ interface CommentDao {
     @Query("SELECT * FROM comments WHERE movieId = :movieId ORDER BY timestamp DESC")
     fun getCommentsForMovie(movieId: String): Flow<List<CommentEntity>>
 
+    @Query("DELETE FROM comments WHERE id = :commentId")
+    suspend fun deleteById(commentId: String)
+
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(comments: List<CommentEntity>)
 }
@@ -60,6 +64,11 @@ class CommentRepository(
     fun getAllComments() = dao.getAllComments()
 
     fun getCommentsForMovie(movieId: String) = dao.getCommentsForMovie(movieId)
+
+    suspend fun deleteCommentAndSync(commentId: String) {
+        deleteComment(commentId)
+        dao.deleteById(commentId)
+    }
 
     // ------------------- SYNC FROM FIRESTORE -------------------
     suspend fun sync() {
@@ -100,6 +109,19 @@ class CommentRepository(
             false
         }
     }
+
+    suspend fun deleteComment(commentId: String): Boolean {
+        return try {
+            firestore.collection("comment")
+                .document(commentId)
+                .delete()
+                .await()
+
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
 }
 
 class CommentViewModel(private val repo: CommentRepository) : ViewModel() {
@@ -115,6 +137,12 @@ class CommentViewModel(private val repo: CommentRepository) : ViewModel() {
         viewModelScope.launch {
             repo.addComment(comment)
             repo.sync()       // refresh local cache
+        }
+    }
+
+    fun deleteComment(commentId: String) {
+        viewModelScope.launch {
+            repo.deleteCommentAndSync(commentId)
         }
     }
 
