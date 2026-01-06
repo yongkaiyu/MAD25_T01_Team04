@@ -251,6 +251,9 @@ fun ReviewScreen(
                     comment = comment,
                     onDelete = { commentId ->
                         commentViewModel.deleteComment(commentId)
+                    },
+                    onUpdate = { updatedComment ->
+                        commentViewModel.updateComment(updatedComment)
                     }
                 )
             }

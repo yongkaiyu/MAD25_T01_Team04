@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.room.*
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.SetOptions
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
@@ -40,6 +41,10 @@ interface CommentDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(comments: List<CommentEntity>)
+
+    @Update
+    suspend fun updateComment(comment: CommentEntity)
+
 }
 
 class CommentViewModelFactory(
@@ -110,6 +115,29 @@ class CommentRepository(
         }
     }
 
+    suspend fun updateComment(comment: CommentEntity): Boolean {
+        return try {
+            val map = hashMapOf(
+                "userId" to comment.userId,
+                "userName" to comment.userName,
+                "movieId" to comment.movieId,
+                "movieName" to comment.movieName,
+                "comment" to comment.comment,
+                "rating" to comment.rating,
+                "timestamp" to FieldValue.serverTimestamp()
+            )
+
+            firestore.collection("comment")
+                .document(comment.id) // use the existing comment ID
+                .set(map, SetOptions.merge()) // merge ensures only updated fields are replaced
+                .await()
+
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
     suspend fun deleteComment(commentId: String): Boolean {
         return try {
             firestore.collection("comment")
@@ -137,6 +165,13 @@ class CommentViewModel(private val repo: CommentRepository) : ViewModel() {
         viewModelScope.launch {
             repo.addComment(comment)
             repo.sync()       // refresh local cache
+        }
+    }
+
+    fun updateComment(comment: CommentEntity) {
+        viewModelScope.launch {
+            repo.updateComment(comment)
+            repo.sync()
         }
     }
 

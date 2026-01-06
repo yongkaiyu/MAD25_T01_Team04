@@ -273,10 +273,16 @@ enum class AppDestinations(
 @Composable
 fun CommentItem(
     comment: CommentEntity,
-    onDelete: (String) -> Unit) {
+    onDelete: (String) -> Unit,
+    onUpdate: (CommentEntity) -> Unit
+) {
 
     val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
     val isOwner = comment.userId == currentUserId
+
+    var isEditing by remember { mutableStateOf(false) }
+    var editedText by remember { mutableStateOf(comment.comment) }
+    var editedRating by remember { mutableStateOf(comment.rating) }
 
     var showDeleteDialog by remember { mutableStateOf(false) }
 
@@ -297,7 +303,7 @@ fun CommentItem(
             )
 
             // Delete icon (only owner)
-            if (isOwner) {
+            if (isOwner && !isEditing) {
                 IconButton(onClick = { showDeleteDialog = true }) {
                     Icon(
                         imageVector = Icons.Default.Delete,
@@ -310,7 +316,100 @@ fun CommentItem(
 
         Spacer(modifier = Modifier.height(4.dp))
 
-        ReadOnlyStarRating(rating = comment.rating)
+        // ---------- Editing Mode ----------
+        if (isEditing && isOwner) {
+
+            StarRatingInput(
+                rating = editedRating,
+                onRatingChanged = { editedRating = it }
+            )
+
+            Spacer(modifier = Modifier.height(6.dp))
+
+            OutlinedTextField(
+                value = editedText,
+                onValueChange = { editedText = it },
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White,
+                    focusedBorderColor = Color.White,
+                    unfocusedBorderColor = Color.Gray
+                )
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End
+            ) {
+                TextButton(
+                    onClick = {
+                        editedText = comment.comment
+                        editedRating = comment.rating
+                        isEditing = false
+                    }
+                ) {
+                    Text("Cancel", color = Color.Gray)
+                }
+
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Button(
+                    onClick = {
+                        onUpdate(
+                            comment.copy(
+                                comment = editedText,
+                                rating = editedRating,
+                                timestamp = System.currentTimeMillis()
+                            )
+                        )
+                        isEditing = false
+                    },
+                    enabled = editedText.isNotBlank() && editedRating > 0
+                ) {
+                    Text("Save")
+                }
+            }
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            // Delete button moves DOWN in edit mode
+            TextButton(
+                onClick = { showDeleteDialog = true }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = null,
+                    tint = Color.Red
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text("Delete", color = Color.Red)
+            }
+
+        } else {
+
+            // ---------- Read-only Mode ----------
+            Column(
+                modifier = Modifier
+                    .clickable(enabled = isOwner) {
+                        isEditing = true
+                    }
+            ) {
+                ReadOnlyStarRating(rating = comment.rating)
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Text(
+                    text = comment.comment,
+                    color = Color.White,
+                    fontSize = 15.sp
+                )
+            }
+        }
+
+        /* ReadOnlyStarRating(rating = comment.rating)
 
         Spacer(modifier = Modifier.height(4.dp))
 
@@ -318,7 +417,7 @@ fun CommentItem(
             text = comment.comment,
             color = Color.White,
             fontSize = 15.sp
-        )
+        ) */
     }
 
     // 🔔 Confirmation Dialog
