@@ -208,7 +208,7 @@ fun ReviewScreen(
                     if (commentText.isNotBlank() && currentUser != null && rating > 0) {
 
                         val comment = CommentEntity(
-                            id = UUID.randomUUID().toString(),   // local ID (Firestore uses auto ID)
+                            id = "",
                             userId = currentUser.uid,
                             userName = currentUser.displayName ?: "Anonymous",
                             movieId = selectedMovieId!!,
