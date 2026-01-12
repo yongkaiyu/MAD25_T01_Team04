@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
-
+// CommentEntity - Model (Data Structure)
 @Entity(tableName = "comments")
 data class CommentEntity(
     @PrimaryKey val id: String,          // Firestore auto ID
@@ -26,9 +26,11 @@ data class CommentEntity(
     val timestamp: Long
 )
 
+// Dao - Data Access Object - Model (Persistence logic)
 @Dao
 interface CommentDao {
-
+    // Defined how data is accessed locally
+    // Flow used to automatically update UI when data changes
     @Query("SELECT * FROM comments ORDER BY timestamp DESC")
     fun getAllComments(): Flow<List<CommentEntity>>
 
@@ -47,6 +49,7 @@ interface CommentDao {
 
 }
 
+// CommentViewModelFactory - Creates ViewModel with parameters to store constructor arguments
 class CommentViewModelFactory(
     private val repository: CommentRepository
 ) : ViewModelProvider.Factory {
@@ -60,7 +63,7 @@ class CommentViewModelFactory(
     }
 }
 
-
+// CommentRepository - Model of the MVC architecture (Domain + Data Orchestration)
 class CommentRepository(
     private val dao: CommentDao,
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance()
@@ -152,6 +155,7 @@ class CommentRepository(
     }
 }
 
+// CommentViewModel - Serves as controller in MVC architecture, holds UI-ready state, triggers data sync
 class CommentViewModel(private val repo: CommentRepository) : ViewModel() {
 
     val comments = repo.getAllComments()
@@ -181,6 +185,7 @@ class CommentViewModel(private val repo: CommentRepository) : ViewModel() {
         }
     }
 
+    // Automatically fetches and caches data, keeps View component free of data-fetch logic
     init {
         viewModelScope.launch { repo.sync() }
     }

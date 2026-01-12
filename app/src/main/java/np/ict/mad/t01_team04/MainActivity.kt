@@ -58,6 +58,7 @@ class LoginScreen : ComponentActivity() {
 
         val controller = WindowCompat.getInsetsController(window,window.decorView)
 
+        // Make theme black
         controller.isAppearanceLightNavigationBars = false
         controller.isAppearanceLightStatusBars = false
 
@@ -114,6 +115,7 @@ fun LoginScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ){
 
+            // Icon
             Text(
                 text = "CineXplorer",
                 fontSize = 40.sp,
@@ -123,6 +125,7 @@ fun LoginScreen(
 
             Spacer(Modifier.height(32.dp))
 
+            // Username Input
             OutlinedTextField(
                 value = usernameInput   ,
                 onValueChange = {usernameInput = it},
@@ -139,8 +142,10 @@ fun LoginScreen(
                     unfocusedLeadingIconColor = Color.White
                 )
             )
+
             Spacer(modifier = Modifier.padding(12.dp))
 
+            // Password Input
             OutlinedTextField(
                 value = password,
                 onValueChange = {password = it},
@@ -161,6 +166,7 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.padding(12.dp))
 
+            // Login Button
             Button(
                 onClick = {
                     scope.launch {
@@ -183,6 +189,7 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.padding(16.dp))
 
+            // Sign Up Button
             TextButton(
                 onClick = {
                     if(usernameInput.isEmpty() || password.isEmpty()){

@@ -18,7 +18,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
@@ -41,9 +40,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.firebase.auth.FirebaseAuth
-import java.util.UUID
 import kotlin.math.roundToInt
 
+// Review Page UI
 @Composable
 fun ReviewScreen(
     viewModel: ContentViewModel,
@@ -56,12 +55,12 @@ fun ReviewScreen(
     var expanded by remember { mutableStateOf(false) }
     var selectedMovieTitle by remember { mutableStateOf("Select a Movie") }
     var selectedMovieId by remember { mutableStateOf<String?>(null) }
-    // --- Comment input state ---
+    // Comment input state
     var commentText by remember { mutableStateOf("") }
 
     var rating by remember { mutableStateOf(0) }
 
-    // --- Comment display state ---
+    // Comment display state
     val comments by remember(selectedMovieId) {
         selectedMovieId?.let {
             commentViewModel.commentsForMovie(it)
@@ -90,6 +89,7 @@ fun ReviewScreen(
 
         Spacer(modifier = Modifier.height(60.dp))
 
+        // Add a Comment Title
         Text(
             text = "Add a Comment",
             color = Color.White,
@@ -130,27 +130,30 @@ fun ReviewScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // Additional UI later (comment textbox, submit button)
-        Text(
+        // Movie Id Display (Used For Testing)
+        /* Text(
             text = "Selected Movie ID: ${selectedMovieId ?: "None"}",
             color = Color.Gray,
             fontSize = 14.sp
-        )
+        ) */
 
-        // --- Show ONLY after movie selected ---
+        // Show ONLY after movie selected
         if (selectedMovieId != null) {
 
             Spacer(modifier = Modifier.height(20.dp))
 
+            // Average Rating Title Display
             Text(
                 text = "Average Rating",
                 color = Color.White,
                 fontSize = 14.sp
             )
 
+            // Average Rating Display for Movie
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                // Star Display UI
                 repeat(5) { index ->
                     Icon(
                         imageVector = Icons.Filled.Star,
@@ -165,6 +168,7 @@ fun ReviewScreen(
 
                 Spacer(modifier = Modifier.width(8.dp))
 
+                // Average Rating Number Display
                 Text(
                     text = String.format("%.1f / 5", averageRating),
                     color = Color.White,
@@ -175,17 +179,20 @@ fun ReviewScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
+            // Your Rating Title
             Text(
                 text = "Your Rating",
                 color = Color.White,
                 fontSize = 14.sp
             )
 
+            // Star Rating Selector
             StarRatingInput(
                 rating = rating,
                 onRatingChanged = { rating = it }
             )
 
+            // Comment Input
             OutlinedTextField(
                 value = commentText,
                 onValueChange = { commentText = it },
@@ -203,6 +210,7 @@ fun ReviewScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Submit Button
             Button(
                 onClick = {
                     if (commentText.isNotBlank() && currentUser != null && rating > 0) {
@@ -232,6 +240,7 @@ fun ReviewScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        // Comments Title Display
         Text(
             text = "Comments",
             color = Color.White,
@@ -241,6 +250,7 @@ fun ReviewScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
+        // Comments from the movie section
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -262,6 +272,7 @@ fun ReviewScreen(
     }
 }
 
+// Function for Star Rating Input
 @Composable
 fun StarRatingInput(
     rating: Int,                  // 0..5

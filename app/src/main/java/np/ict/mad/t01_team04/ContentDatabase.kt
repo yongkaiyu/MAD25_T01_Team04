@@ -5,13 +5,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.room.Dao
-import androidx.room.Database
 import androidx.room.Entity
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.PrimaryKey
 import androidx.room.Query
-import androidx.room.RoomDatabase
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -19,7 +17,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
-
+// ContentEntity - Model (Data Structure)
 @Entity(tableName = "content")
 data class ContentEntity(
     @PrimaryKey val id: String,
@@ -31,8 +29,11 @@ data class ContentEntity(
     val createdAt: Long
 )
 
+// Dao - Data Access Object - Model (Persistence logic)
 @Dao
 interface ContentDao {
+    // Defined how data is accessed locally
+    // Flow used to automatically update UI when data changes
     @Query("SELECT * FROM content ORDER BY createdAt DESC")
     fun getAllContent(): Flow<List<ContentEntity>>
 
@@ -43,6 +44,7 @@ interface ContentDao {
     suspend fun insertAll(content: List<ContentEntity>)
 }
 
+// ContentViewModelFactory - Creates ViewModel with parameters to store constructor arguments
 class ContentViewModelFactory(
     private val repository: ContentRepository
 ) : ViewModelProvider.Factory {
@@ -57,7 +59,7 @@ class ContentViewModelFactory(
 }
 
 
-// Combines Firebase Helper + Room Helper + Repository logic
+// ContentRepository - Model of the MVC architecture (Domain + Data Orchestration)
 class ContentRepository(
     private val dao: ContentDao,
     private val firebase: FirebaseFirestore = FirebaseFirestore.getInstance()
@@ -65,6 +67,7 @@ class ContentRepository(
     fun getContent() = dao.getAllContent()
     fun getContentDetails(id: String) = dao.getContentById(id)
 
+    // Sync logic between Firebase and Room
     suspend fun sync() {
         try {
             val snapshot = firebase.collection("content").get().await()
@@ -86,13 +89,16 @@ class ContentRepository(
     }
 }
 
+// ContentViewModel - Serves as controller in MVC architecture, holds UI-ready state, triggers data sync
 class ContentViewModel(private val repo: ContentRepository): ViewModel() {
+    // Converts Raw Flow into lifecycle-aware state, protects UI from data source changes
     val contentList = repo.getContent()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), emptyList())
 
     fun getDetails(id: String) = repo.getContentDetails(id)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
 
+    // Automatically fetches and caches data, keeps View component free of data-fetch logic
     init {
         viewModelScope.launch { repo.sync() } // fetch & cache
     }
