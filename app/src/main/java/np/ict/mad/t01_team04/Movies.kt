@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 
+// Movies UI Page
 @Composable
 fun Movies(viewModel: ContentViewModel, onItemClick: (String) -> Unit) {
     val contentList by viewModel.contentList.collectAsState()
@@ -38,6 +39,7 @@ fun Movies(viewModel: ContentViewModel, onItemClick: (String) -> Unit) {
         // Section title
         Spacer(modifier = Modifier.height(40.dp))
 
+        // Trending Title
         Text(
             text = "Trending",
             color = Color.White,
@@ -63,6 +65,7 @@ fun Movies(viewModel: ContentViewModel, onItemClick: (String) -> Unit) {
     }
 }
 
+// Layout of one Movie Card
 @Composable
 fun MovieCard(item: ContentEntity, onClick: () -> Unit) {
     Column(
@@ -104,7 +107,7 @@ fun MovieCard(item: ContentEntity, onClick: () -> Unit) {
             }
         }
 
-
+        // Name Title
         Spacer(modifier = Modifier.height(4.dp))
         Text(
             text = item.title,

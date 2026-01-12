@@ -47,6 +47,7 @@ import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.google.firebase.auth.FirebaseAuth
 
+// UI layout for displaying movie content of one movie
 @Composable
 fun ContentDetailScreen(contentId: String, viewModel: ContentViewModel, commentViewModel: CommentViewModel, onBack: () -> Unit) {
     // Fix flickering of white loader
@@ -85,6 +86,8 @@ fun ContentDetailScreen(contentId: String, viewModel: ContentViewModel, commentV
                 .padding(16.dp)
         ) {
             Spacer(modifier = Modifier.height(40.dp))
+
+            // Back Button
             IconButton(
                 onClick = { onBack() },
                 modifier = Modifier
@@ -100,6 +103,7 @@ fun ContentDetailScreen(contentId: String, viewModel: ContentViewModel, commentV
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Name of movie
             Text(
                 text = item.title,
                 fontSize = 24.sp,
@@ -116,6 +120,7 @@ fun ContentDetailScreen(contentId: String, viewModel: ContentViewModel, commentV
                     .build()
             )
 
+            // Thumbnail of Movie
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -131,6 +136,7 @@ fun ContentDetailScreen(contentId: String, viewModel: ContentViewModel, commentV
                 )
             }
 
+            // Movie Description
             Spacer(modifier = Modifier.height(12.dp))
             Text(
                 text = item.description,
@@ -149,6 +155,7 @@ fun ContentDetailScreen(contentId: String, viewModel: ContentViewModel, commentV
 
             Spacer(modifier = Modifier.height(12.dp))*/
 
+            // Movie Rating
             Text(
                 text = "Your Rating",
                 color = Color.White,
@@ -157,6 +164,7 @@ fun ContentDetailScreen(contentId: String, viewModel: ContentViewModel, commentV
 
             Spacer(modifier = Modifier.height(4.dp))
 
+            // Star Rating Selector
             StarRatingSelector(
                 rating = rating,
                 onRatingSelected = { rating = it }
@@ -164,7 +172,7 @@ fun ContentDetailScreen(contentId: String, viewModel: ContentViewModel, commentV
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // ---- Comment input ----
+            // Comment Input
             OutlinedTextField(
                 value = commentText,
                 onValueChange = { commentText = it },
@@ -180,6 +188,7 @@ fun ContentDetailScreen(contentId: String, viewModel: ContentViewModel, commentV
 
             Spacer(modifier = Modifier.height(8.dp))
 
+            // Submit Comment Button
             Button(
                 onClick = {
                     val user = FirebaseAuth.getInstance().currentUser ?: return@Button
@@ -208,6 +217,7 @@ fun ContentDetailScreen(contentId: String, viewModel: ContentViewModel, commentV
 
             Spacer(modifier = Modifier.height(16.dp))
 
+            // Comment Display Title
             Text(
                 text = "Comments",
                 color = Color.White,
@@ -217,6 +227,7 @@ fun ContentDetailScreen(contentId: String, viewModel: ContentViewModel, commentV
 
             Spacer(modifier = Modifier.height(8.dp))
 
+            // Comments of the respective movie
             LazyColumn(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -238,6 +249,7 @@ fun ContentDetailScreen(contentId: String, viewModel: ContentViewModel, commentV
     }
 }
 
+// Function of Star Rating Selector
 @Composable
 fun StarRatingSelector(
     rating: Int,                  // 0..5
