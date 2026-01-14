@@ -303,40 +303,40 @@ Feature overview (Comment & Rating System)
 
 Architecture diagram
 
-┌──────────────────────────────┐
-│          UI Layer            │        (View)
-│  Jetpack Compose Screens     │
-└──────────────▲───────────────┘
-               │  State (Flow / LiveData)
-               │
-┌──────────────┴───────────────┐
-│        ViewModel Layer       │        (Controller)
-│       CommentViewModel       │                ┌──────────────────────────────┐
-│                              │                │      ViewModel Factory       │
-│     Handles UI state,        │<───────────────│   CommentViewModelFactory    │
-│       validation             │                │                              │
-│  and user ownership logic    │                │ Enables constructor argument │ 
-└──────────────▲───────────────┘                └──────────────────────────────┘
-               │
-               │   Repository abstraction
-               │
-┌──────────────┴───────────────┐
-│       Repository Layer       │
-│      CommentRepository       │
-│                              │        (Model)
-│  Single source of truth      │
-│           logic              │
-└───────▲──────────────────▲───┘
-        │                  │
-        │                  │
-┌───────┴────────┐   ┌─────┴───────────────┐
-│   Room (Local) │   │ Firebase Firestore  │
-│  CommentDao    │   │  Cloud Database     │
-│                │   │  comment collection │         (Database)
-│                │   │                     │
-│                │   │                     │
-│                │   │                     │
-└────────────────┘   └─────────────────────┘
+    ┌──────────────────────────────┐
+    │          UI Layer            │        (View)
+    │  Jetpack Compose Screens     │
+    └──────────────▲───────────────┘
+                   │  State (Flow / LiveData)
+                   │
+    ┌──────────────┴───────────────┐
+    │        ViewModel Layer       │        (Controller)
+    │       CommentViewModel       │                ┌──────────────────────────────┐
+    │                              │                │      ViewModel Factory       │
+    │     Handles UI state,        │<───────────────│   CommentViewModelFactory    │
+    │       validation             │                │                              │
+    │  and user ownership logic    │                │ Enables constructor argument │ 
+    └──────────────▲───────────────┘                └──────────────────────────────┘
+                   │
+                   │   Repository abstraction
+                   │
+    ┌──────────────┴───────────────┐
+    │       Repository Layer       │
+    │      CommentRepository       │
+    │                              │        (Model)
+    │  Single source of truth      │
+    │           logic              │
+    └───────▲──────────────────▲───┘
+            │                  │
+            │                  │
+    ┌───────┴────────┐   ┌─────┴───────────────┐
+    │   Room (Local) │   │ Firebase Firestore  │
+    │  CommentDao    │   │  Cloud Database     │
+    │                │   │  comment collection │         (Database)
+    │                │   │                     │
+    │                │   │                     │
+    │                │   │                     │
+    └────────────────┘   └─────────────────────┘
 
 
 Data Model explanation
