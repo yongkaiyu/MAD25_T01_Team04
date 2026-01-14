@@ -289,3 +289,188 @@ Wireframes
 
 ![img_16.png](img_16.png)
 
+Phase 2:
+
+Feature overview (Comment & Rating System)
+
+- Movie Selector Dropdown -> Users are able to choose which movie to comment on
+- Comment Input Box -> Users are able to input their comment
+- Comment Edit and Delete Functionality -> Users are able to edit and delete their own comment
+- Clickable Star Rating Selector -> Users are able to rate the movie using a clickable interface of 5 stars. Users can choose up to 5 stars to indicate their rating 
+- Comment Display -> Users are able to view comments from respective movies either from the Review Screen or under the detail page of the movie
+- Firestore datastore + Room as local cache -> comment and rating data are stored in firestore, data changes are automatically synchronized with Room and UI
+- Delete Function Confirmation Dialog -> Pop-Up for verification will appear to avoid accidentally deletion
+
+Architecture diagram
+
+┌──────────────────────────────┐
+│          UI Layer            │        (View)
+│  Jetpack Compose Screens     │
+└──────────────▲───────────────┘
+               │  State (Flow / LiveData)
+               │
+┌──────────────┴───────────────┐
+│        ViewModel Layer       │        (Controller)
+│       CommentViewModel       │                ┌──────────────────────────────┐
+│                              │                │      ViewModel Factory       │
+│     Handles UI state,        │<───────────────│   CommentViewModelFactory    │
+│       validation             │                │                              │
+│  and user ownership logic    │                │ Enables constructor argument │ 
+└──────────────▲───────────────┘                └──────────────────────────────┘
+               │
+               │   Repository abstraction
+               │
+┌──────────────┴───────────────┐
+│       Repository Layer       │
+│      CommentRepository       │
+│                              │        (Model)
+│  Single source of truth      │
+│           logic              │
+└───────▲──────────────────▲───┘
+        │                  │
+        │                  │
+┌───────┴────────┐   ┌─────┴───────────────┐
+│   Room (Local) │   │ Firebase Firestore  │
+│  CommentDao    │   │  Cloud Database     │
+│                │   │  comment collection │         (Database)
+│                │   │                     │
+│                │   │                     │
+│                │   │                     │
+└────────────────┘   └─────────────────────┘
+
+
+Data Model explanation
+
+    @Entity(tableName = "comments")
+    data class CommentEntity(
+        @PrimaryKey val id: String,          // Firestore auto ID
+        val userId: String,
+        val userName: String,
+        val movieId: String,
+        val movieName: String,
+        val comment: String,
+        val rating: Int,
+        val timestamp: Long
+    )
+
+- id: unique identifier
+- userId: to indicate who the comment belongs to
+- userName: much more accessible to retrieve for display
+- movieId: to indicate which movie the comment belongs to
+- comment: the comment message
+- rating: the rating given by user
+- timestamp: to save the time it was created or modified
+
+Firebase + Room sync logic
+
+1. Read Flow (Firebase -> Room -> UI)
+
+        Firebase Snapshot Listener
+                ↓
+        Repository maps documents
+                ↓
+        Room insert/update
+                ↓
+        Room Flow emits changes
+                ↓
+        ViewModel collects
+                ↓
+        Compose recomposes UI
+
+    It avoids UI flickering, supports configuration changes safely and UI remains responsive
+
+2. Write Flow (UI -> Firebase -> Room)
+
+    Add / Update Comment
+
+        User Action
+            ↓
+        ViewModel validation
+            ↓
+        Repository writes to Firebase
+            ↓
+        On success → write to Room
+            ↓
+        UI auto-updates from Room
+
+    Delete Comment
+        
+        Delete Confirmation
+            ↓
+        Firebase delete
+            ↓
+        Room delete
+            ↓
+        UI updates instantly
+
+User guide (how to comment, edit, delete)
+1. How to add a comment on the Review Page
+   1. Under Home Page, click Review under the navigation UI bar
+   2. Click the Select a Movie clickable, a dropdown of the movies should be displayed
+   3. Choose a movie you would like to comment on
+   4. Choose your rating by clicking on the clickable stars
+   5. Click on the comment input box and input your comment
+   6. Once you have a rating and a comment, a button labelled "Submit Comment" appears
+   7. Click on the "Submit Comment" button once you are done
+   8. Your comment should automatically appear under the Comments section
+2. How to add a comment on the Detail Page for a selected movie
+   1. Under Home Page, click Movies under the navigation UI bar
+   2. Click on the thumbnail of the movie you would like to comment on
+   3. Choose your rating by clicking on the clickable stars
+   4. Click on the comment input box and input your comment
+   5. Once you have a rating and a comment, a button labelled "Post" appears
+   6. Click on the "Post" button once you are done
+   7. Your comment should automatically appear under the Comments section
+3. How to edit a comment on the Review Page
+   1. Under Home Page, click Review under the navigation UI bar
+   2. Click the Select a Movie clickable, a dropdown of the movies should be displayed
+   3. Navigate to the Comments Section
+   4. Find your comment that you would want to edit (should have a red trash bin icon)
+   5. Click on the area where the comment is displayed
+   6. Change your rating by clicking on the clickable stars
+   7. Change your comment by clicking on the comment input box
+   8. Click "Cancel" if you do not want to change your comment
+   9. Click "Save" if you want to save your changes
+   10. Your comment should automatically update itself under the Comments section
+4. How to edit a comment on the Detail Page for a selected movie
+   1. Under Home Page, click Movies under the navigation UI bar
+   2. Click on the thumbnail of the movie you would like to comment on
+   3. Navigate to the Comments Section
+   4. Find your comment that you would want to edit (should have a red trash bin icon)
+   5. Click on the area where the comment is displayed
+   6. Change your rating by clicking on the clickable stars
+   7. Change your comment by clicking on the comment input box
+   8. Click "Cancel" if you do not want to change your comment
+   9. Click "Save" if you want to save your changes
+   10. Your comment should automatically update itself under the Comments section
+5. How to delete a comment on the Review Page
+   1. Under Home Page, click Review under the navigation UI bar
+   2. Click the Select a Movie clickable, a dropdown of the movies should be displayed
+   3. Navigate to the Comments Section
+   4. Find your comment that you would want to delete (should have a red trash bin icon)
+   5. Click one the red trash bin icon
+   6. A pop-up verifying your action should appear
+   7. Click Cancel if you do not want to delete the comment
+   8. Click Delete to confirm the deletion of your comment
+   9. Your comment should be not be visible under the comments section if you had chosen to delete
+6. How to delete a comment on the Detail Page for a selected movie
+   1. Under Home Page, click Movies under the navigation UI bar
+   2. Click on the thumbnail of the movie you would like to comment on
+   3. Navigate to the Comments Section
+   4. Find your comment that you would want to delete (should have a red trash bin icon)
+   5. Click one the red trash bin icon
+   6. A pop-up verifying your action should appear
+   7. Click Cancel if you do not want to delete the comment
+   8. Click Delete to confirm the deletion of your comment
+   9. Your comment should be not be visible under the comments section if you had chosen to delete
+
+Accessibility considerations
+
+- User Insight: It would be convenient to be able to read comments once I have learnt more about the movie.
+- Resolution: User is now able to view, add, edit and delete comments under the movie detail page
+
+- User Insight: It would be great if there was a double-check before deleting a comment, I might accidentally misclick on the button
+- Resolution: Whenever a comment is deleted, a pop-up appears to verify their selection before deleting the comment.
+
+- Diverse User Need Addressed: Dark-themed UI with high contrast text and icons support users with low vision.
+- Diverse User Need Addressed: Critical actions (submit,delete,and edit) use color with iconography instead of just color, preventing reliance on color distinctions.
