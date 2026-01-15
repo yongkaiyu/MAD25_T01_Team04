@@ -29,6 +29,7 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -316,7 +317,8 @@ fun CommentItem(
                         )
                         isEditing = false
                     },
-                    enabled = editedText.isNotBlank() && editedRating > 0
+                    enabled = editedText.isNotBlank() && editedRating > 0,
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF9B4DFF))
                 ) {
                     Text("Save")
                 }

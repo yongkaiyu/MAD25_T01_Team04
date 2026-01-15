@@ -232,7 +232,8 @@ fun ReviewScreen(
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
-                enabled = commentText.isNotBlank() && rating > 0
+                enabled = commentText.isNotBlank() && rating > 0,
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF9B4DFF))
             ) {
                 Text("Submit Comment")
             }

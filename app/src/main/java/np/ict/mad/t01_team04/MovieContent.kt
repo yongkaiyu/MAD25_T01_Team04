@@ -21,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -209,10 +210,11 @@ fun ContentDetailScreen(contentId: String, viewModel: ContentViewModel, commentV
                     commentText = ""
                     rating = 0
                 },
-                enabled = commentText.isNotBlank(),
-                modifier = Modifier.align(Alignment.End)
+                enabled = commentText.isNotBlank() && rating > 0,
+                modifier = Modifier.align(Alignment.End),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF9B4DFF))
             ) {
-                Text("Post")
+                Text("Submit Comment")
             }
 
             Spacer(modifier = Modifier.height(16.dp))
