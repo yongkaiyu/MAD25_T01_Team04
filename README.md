@@ -289,9 +289,9 @@ Wireframes
 
 ![img_16.png](img_16.png)
 
-Phase 2:
+Stage 2:
 
-Feature overview (Comment & Rating System)
+Feature overview (Comment & Rating System) - Yong Kai Yu
 
 - Movie Selector Dropdown -> Users are able to choose which movie to comment on
 - Comment Input Box -> Users are able to input their comment
@@ -301,7 +301,82 @@ Feature overview (Comment & Rating System)
 - Firestore datastore + Room as local cache -> comment and rating data are stored in firestore, data changes are automatically synchronized with Room and UI
 - Delete Function Confirmation Dialog -> Pop-Up for verification will appear to avoid accidentally deletion
 
-Architecture diagram
+User Research for addressing core user needs
+
+    - Research Goal
+        The goal of the user research is to evaluate the usability, clarity, and usefulness of the current comment feature within the app, and to identify any pain points. 
+        It aims to validate whether the feature engages the user while being accessible.
+    - Methodology
+        Testing: Usability Testing (9 pax)
+        Test Outline:
+            1. Choose a movie and submit a comment with a rating
+            2. View existing ratings and comments
+            3. Edit and delete their own comment
+            4. Interpret average movie ratings
+            5. Attempt to find another way to submit a comment
+        
+    - Competitor Research 
+
+        Competitor: YouTube
+        Insights: Has comment system, but rating system is based on likes and dislikes,shows number of likes but not dislikes.
+
+        Competitor: Netflix
+        Insights: No dedicated comment system, rating system is based on 3 options (Love this!, I like this, Not for me)
+        
+        Competitor: Disney+
+        Insights: No dedicated comment system, rating system is based on like and dislike system. Does not show the number of likes and dislikes
+        
+        Competitor: IMDb
+        Insights: No dedicated comment system, rating system is a number based rating system of out of 10. Shows the bar chart of total users of each rating.
+
+        Solution is completely unique with its dedicated comment system integrated with its own rating system.
+
+    - Key Insights from Testing
+        
+        1. Ratings were more valuable than comments alone
+            
+            Observation: Most participants suggested that the comments without the rating system originally felt incomplete and lacked personality
+            
+            User Feedback:
+                - I feel that the comment I entered is insignificant, people are not able to really tell how I rate this movie
+                - There is something missing when I see my comment, it lacks sentiment
+
+            Design Change:
+                - Added a 5 star rating system
+                - Displayed average rating for each movie, numerically and visually
+                - Mandatory to have a rating when commenting
+            
+            User Need Addressed: Comments felt incomplete and lacked personality 
+
+        2. Users expect functionality over their content
+            
+            Observation: Users feedback that they did not like that they were originally not able to edit or delete their own comment
+            
+            User Feedback:
+                - Not being able to change my comment is something I disapprove, now the next time I feel like changing, I would have to put a new comment
+                - I should be able to delete my own comment
+            
+            Design Change:
+                - Implemented edit and delete functionality for their own posted comments
+
+            User Need Addressed: Comments lacked customization
+
+        3. Users do not want accidential actions
+            
+            Observation: Users felt that there was no verification when deleting their own comment and comments could be submitted with no rating or comment
+            
+            User Feedback:
+                - I worry that I might be careless and delete my comment by accident since it only requires one click
+                - Deleting comments should be double-checked
+                - I should not be able to submit my comment with no rating
+
+            Design Change:
+                - Integrated confirmation dialog for deletion of comment
+                - Comments require at least one star now and the comment input to not be empty
+
+            User Need Addressed: Comments required a second layer for confirmation
+
+Architecture Diagram
 
     ┌──────────────────────────────┐
     │          UI Layer            │        (View)
@@ -339,7 +414,7 @@ Architecture diagram
     └────────────────┘   └─────────────────────┘
 
 
-Data Model explanation
+Data Model Explanation
 
     @Entity(tableName = "comments")
     data class CommentEntity(
@@ -403,74 +478,76 @@ Firebase + Room sync logic
             ↓
         UI updates instantly
 
-User guide (how to comment, edit, delete)
-1. How to add a comment on the Review Page
-   1. Under Home Page, click Review under the navigation UI bar
-   2. Click the Select a Movie clickable, a dropdown of the movies should be displayed
-   3. Choose a movie you would like to comment on
-   4. Choose your rating by clicking on the clickable stars
-   5. Click on the comment input box and input your comment
-   6. Once you have a rating and a comment, a button labelled "Submit Comment" appears
-   7. Click on the "Submit Comment" button once you are done
-   8. Your comment should automatically appear under the Comments section
-2. How to add a comment on the Detail Page for a selected movie
-   1. Under Home Page, click Movies under the navigation UI bar
-   2. Click on the thumbnail of the movie you would like to comment on
-   3. Choose your rating by clicking on the clickable stars
-   4. Click on the comment input box and input your comment
-   5. Once you have a rating and a comment, a button labelled "Post" appears
-   6. Click on the "Post" button once you are done
-   7. Your comment should automatically appear under the Comments section
-3. How to edit a comment on the Review Page
-   1. Under Home Page, click Review under the navigation UI bar
-   2. Click the Select a Movie clickable, a dropdown of the movies should be displayed
-   3. Navigate to the Comments Section
-   4. Find your comment that you would want to edit (should have a red trash bin icon)
-   5. Click on the area where the comment is displayed
-   6. Change your rating by clicking on the clickable stars
-   7. Change your comment by clicking on the comment input box
-   8. Click "Cancel" if you do not want to change your comment
-   9. Click "Save" if you want to save your changes
-   10. Your comment should automatically update itself under the Comments section
-4. How to edit a comment on the Detail Page for a selected movie
-   1. Under Home Page, click Movies under the navigation UI bar
-   2. Click on the thumbnail of the movie you would like to comment on
-   3. Navigate to the Comments Section
-   4. Find your comment that you would want to edit (should have a red trash bin icon)
-   5. Click on the area where the comment is displayed
-   6. Change your rating by clicking on the clickable stars
-   7. Change your comment by clicking on the comment input box
-   8. Click "Cancel" if you do not want to change your comment
-   9. Click "Save" if you want to save your changes
-   10. Your comment should automatically update itself under the Comments section
-5. How to delete a comment on the Review Page
-   1. Under Home Page, click Review under the navigation UI bar
-   2. Click the Select a Movie clickable, a dropdown of the movies should be displayed
-   3. Navigate to the Comments Section
-   4. Find your comment that you would want to delete (should have a red trash bin icon)
-   5. Click one the red trash bin icon
-   6. A pop-up verifying your action should appear
-   7. Click Cancel if you do not want to delete the comment
-   8. Click Delete to confirm the deletion of your comment
-   9. Your comment should be not be visible under the comments section if you had chosen to delete
-6. How to delete a comment on the Detail Page for a selected movie
-   1. Under Home Page, click Movies under the navigation UI bar
-   2. Click on the thumbnail of the movie you would like to comment on
-   3. Navigate to the Comments Section
-   4. Find your comment that you would want to delete (should have a red trash bin icon)
-   5. Click one the red trash bin icon
-   6. A pop-up verifying your action should appear
-   7. Click Cancel if you do not want to delete the comment
-   8. Click Delete to confirm the deletion of your comment
-   9. Your comment should be not be visible under the comments section if you had chosen to delete
+
+User Guide (how to comment, edit, delete)
+
+    1. How to add a comment on the Review Page
+        1. Under Home Page, click Review under the navigation UI bar
+        2. Click the Select a Movie clickable, a dropdown of the movies should be displayed
+        3. Choose a movie you would like to comment on
+        4. Choose your rating by clicking on the clickable stars
+        5. Click on the comment input box and input your comment
+        6. Once you have a rating and a comment, a button labelled "Submit Comment" appears
+        7. Click on the "Submit Comment" button once you are done
+        8. Your comment should automatically appear under the Comments section
+    2. How to add a comment on the Detail Page for a selected movie
+        1. Under Home Page, click Movies under the navigation UI bar
+        2. Click on the thumbnail of the movie you would like to comment on
+        3. Choose your rating by clicking on the clickable stars
+        4. Click on the comment input box and input your comment
+        5. Once you have a rating and a comment, a button labelled "Post" appears
+        6. Click on the "Post" button once you are done
+        7. Your comment should automatically appear under the Comments section
+    3. How to edit a comment on the Review Page
+        1. Under Home Page, click Review under the navigation UI bar
+        2. Click the Select a Movie clickable, a dropdown of the movies should be displayed
+        3. Navigate to the Comments Section
+        4. Find your comment that you would want to edit (should have a red trash bin icon)
+        5. Click on the area where the comment is displayed
+        6. Change your rating by clicking on the clickable stars
+        7. Change your comment by clicking on the comment input box
+        8. Click "Cancel" if you do not want to change your comment
+        9. Click "Save" if you want to save your changes
+        10. Your comment should automatically update itself under the Comments section
+    4. How to edit a comment on the Detail Page for a selected movie
+        1. Under Home Page, click Movies under the navigation UI bar
+        2. Click on the thumbnail of the movie you would like to comment on
+        3. Navigate to the Comments Section
+        4. Find your comment that you would want to edit (should have a red trash bin icon)
+        5. Click on the area where the comment is displayed
+        6. Change your rating by clicking on the clickable stars
+        7. Change your comment by clicking on the comment input box
+        8. Click "Cancel" if you do not want to change your comment
+        9. Click "Save" if you want to save your changes
+        10. Your comment should automatically update itself under the Comments section
+    5. How to delete a comment on the Review Page
+        1. Under Home Page, click Review under the navigation UI bar
+        2. Click the Select a Movie clickable, a dropdown of the movies should be displayed
+        3. Navigate to the Comments Section
+        4. Find your comment that you would want to delete (should have a red trash bin icon)
+        5. Click one the red trash bin icon
+        6. A pop-up verifying your action should appear
+        7. Click Cancel if you do not want to delete the comment
+        8. Click Delete to confirm the deletion of your comment
+        9. Your comment should be not be visible under the comments section if you had chosen to delete
+    6. How to delete a comment on the Detail Page for a selected movie
+        1. Under Home Page, click Movies under the navigation UI bar
+        2. Click on the thumbnail of the movie you would like to comment on
+        3. Navigate to the Comments Section
+        4. Find your comment that you would want to delete (should have a red trash bin icon)
+        5. Click one the red trash bin icon
+        6. A pop-up verifying your action should appear
+        7. Click Cancel if you do not want to delete the comment
+        8. Click Delete to confirm the deletion of your comment
+        9. Your comment should be not be visible under the comments section if you had chosen to delete
 
 Accessibility considerations
 
-- User Insight: It would be convenient to be able to read comments once I have learnt more about the movie.
-- Resolution: User is now able to view, add, edit and delete comments under the movie detail page
+    - User Insight: It would be convenient to be able to read comments once I have learnt more about the movie.
+    - Resolution: User is now able to view, add, edit and delete comments under the movie detail page
 
-- User Insight: It would be great if there was a double-check before deleting a comment, I might accidentally misclick on the button
-- Resolution: Whenever a comment is deleted, a pop-up appears to verify their selection before deleting the comment.
+    - User Insight: It would be great if there was a double-check before deleting a comment, I might accidentally misclick on the button
+    - Resolution: Whenever a comment is deleted, a pop-up appears to verify their selection before deleting the comment.
 
-- Diverse User Need Addressed: Dark-themed UI with high contrast text and icons support users with low vision.
-- Diverse User Need Addressed: Critical actions (submit,delete,and edit) use color with iconography instead of just color, preventing reliance on color distinctions.
+    - Diverse User Need Addressed: Dark-themed UI with high contrast text and icons support users with low vision.
+    - Diverse User Need Addressed: Critical actions (submit,delete,and edit) use color with iconography instead of just color, preventing reliance on color distinctions.
