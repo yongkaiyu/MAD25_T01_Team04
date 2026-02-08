@@ -1273,3 +1273,35 @@ The Watch List feature was designed and implemented independently, while alignin
 - **Date-Based Selection**: The movie selection is tied to the current date, ensuring that all users see the same movie on the same day.
 - **"Change Date" Button**: A "Change Date" button allows users to simulate the passing of a day, making it easy to see how the movie selection changes over time.
 - **Back Navigation**: The back button navigates the user to the "Movies" page, providing a seamless user experience.
+
+Features Implemented - Nagu Adhavan Tabio
+1. Notification Reminder System
+
+users can set a reminder for a movie, which triggers a notification at a selected date and time.
+
+Reminders use AlarmManager and NotificationManager for exact or inexact alarms depending on device permissions.
+
+Features include:
+
+Default 10-second reminder for testing
+
+Option to select a future date and time
+
+Validation to prevent reminders in the past
+
+Each reminder is unique and survives app restarts.
+
+
+Relevance to Stage 2 Requirements
+
+This feature satisfies Stage 2 requirements by:
+
+Introducing a new functional feature
+
+Handling user interaction and input validation
+
+Integrating cleanly with an existing group codebase
+
+Demonstrating meaningful application logic for notifications and reminders
+
+The Watchlist feature was designed and implemented independently, while aligning with the overall application structure and design.
