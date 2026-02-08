@@ -47,10 +47,21 @@ import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.google.firebase.auth.FirebaseAuth
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+
 
 // UI layout for displaying movie content of one movie
 @Composable
-fun ContentDetailScreen(contentId: String, viewModel: ContentViewModel, commentViewModel: CommentViewModel, onBack: () -> Unit) {
+fun ContentDetailScreen(contentId: String, viewModel: ContentViewModel, commentViewModel: CommentViewModel, watchedViewModel: WatchedViewModel, onBack: () -> Unit) {
+
+    val contentState by viewModel.getDetails(contentId).collectAsState()
+
+    LaunchedEffect(contentState?.id) {
+        contentState?.let { watchedViewModel.addFromContent(it) }
+    }
+
     // Fix flickering of white loader
     val contentFlow = remember(contentId) {
         viewModel.getDetails(contentId)
