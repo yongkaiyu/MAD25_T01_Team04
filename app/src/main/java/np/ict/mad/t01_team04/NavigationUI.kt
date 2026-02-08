@@ -22,7 +22,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
-import androidx.compose.material.icons.filled.Casino
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.PlayArrow
@@ -99,6 +99,7 @@ class NavigationUI : ComponentActivity() {
         val viewModel = ViewModelProvider(this, factory)
             .get(ContentViewModel::class.java)
 
+        // --- CommentViewModel ---
         val commentFactory = CommentViewModelFactory(commentRepository)
 
         val commentViewModel = ViewModelProvider(this, commentFactory)
@@ -219,7 +220,7 @@ enum class AppDestinations(
 
     MOVIES("Movies", Icons.Default.PlayArrow),
 
-    DAILY("Mystery", Icons.Default.Casino),
+    DAILY("Mystery", Icons.Default.Search),
 
     REVIEW("Review", Icons.Default.ThumbUp),
 
@@ -378,7 +379,7 @@ fun CommentItem(
         ) */
     }
 
-    // 🔔 Confirmation Dialog
+    // Confirmation Dialog
     if (showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { showDeleteDialog = false },
