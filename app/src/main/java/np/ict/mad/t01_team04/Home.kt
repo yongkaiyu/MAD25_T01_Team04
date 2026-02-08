@@ -1,5 +1,6 @@
 package np.ict.mad.t01_team04
 
+import android.graphics.drawable.Icon
 import android.net.Uri
 import android.view.ViewGroup
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -33,10 +34,28 @@ import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import coil.compose.AsyncImage
+import androidx.compose.runtime.collectAsState
+import androidx.room.Delete
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.snapshotFlow
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.distinctUntilChanged
+
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun Home() {
+fun Home(watchedViewModel: WatchedViewModel) {
+
+    val watchedList by watchedViewModel.watched.collectAsState()
 
     val videos = listOf(
         "https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
@@ -47,6 +66,22 @@ fun Home() {
     )
 
     val pagerState = rememberPagerState(initialPage = 0, pageCount = {videos.size})
+
+    val currentPage = pagerState.currentPage
+
+    LaunchedEffect(pagerState) {
+        snapshotFlow { pagerState.currentPage }
+            .distinctUntilChanged()
+            .collect {
+                page -> delay(800)
+                val url = videos[page]
+                watchedViewModel.addVideoWatched(
+                    contentId = url,
+                    title = "Video ${page + 1}",
+                    thumbnailUrl = ""
+                )
+            }
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
 
@@ -71,6 +106,63 @@ fun Home() {
             modifier = Modifier
                 .padding(top = 40.dp, start = 20.dp)
                 .align(Alignment.TopStart)
+        )
+
+        Column (
+            modifier = Modifier
+                .align(Alignment.BottomStart)
+                .fillMaxWidth()
+                .background(Color.Black.copy(alpha = 0.6f))
+                .padding(bottom = 80.dp, top = 10.dp)
+        ) {
+            Text(
+                text = "Watched",
+                color = Color.White,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(start = 16.dp, bottom = 8.dp)
+            )
+
+            LazyRow(
+                contentPadding = PaddingValues(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(watchedList) {
+                    item -> WatchedCard(item = item, onDelete = {watchedViewModel.remove(item.contentId)})
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun WatchedCard(item: WatchedEntity, onDelete: () -> Unit) {
+    Column (modifier = Modifier.width(140.dp)) {
+        Box(
+            modifier = Modifier
+                .height(90.dp)
+                .fillMaxWidth()
+                .background(Color.DarkGray, RoundedCornerShape(8.dp))
+        ) {
+            if (item.thumbnailUrl.isNotBlank()) {
+                AsyncImage(
+                    model = item.thumbnailUrl,
+                    contentDescription = item.title,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+            IconButton (
+                onClick = onDelete,
+                modifier = Modifier.align(Alignment.TopEnd)
+            ) {
+                Icon(Icons.Default.Delete, contentDescription = "Remove", tint = Color.Red)
+            }
+        }
+
+        Spacer(Modifier.height(6.dp))
+        Text(
+            text = item.title,
+            color = Color.White,
+            maxLines = 1
         )
     }
 }
