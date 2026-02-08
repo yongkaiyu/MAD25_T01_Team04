@@ -61,6 +61,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.room.Room
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.auth.FirebaseAuth
+import android.content.Intent
+import androidx.compose.ui.platform.LocalContext
 
 
 
@@ -444,27 +446,13 @@ fun isInEditMode(): Boolean {
     return LocalView.current.isInEditMode
 }
 
-/*@Composable
-fun Greeting2(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    MAD25_T01_Team04Theme {
-        Greeting2("Android2")
-    }
-}*/
 
 @Composable
 fun ProfileUI(
     username: String = "GuestUser",
     onLogout: () -> Unit = {}
 ) {
+    val context = LocalContext.current
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -515,12 +503,17 @@ fun ProfileUI(
             Spacer(modifier = Modifier.height(30.dp))
 
             // --- Settings List ---
-            ProfileOption("Saved Movies")
-            ProfileOption("My Watchlist")
-            ProfileOption("Account Settings")
-            ProfileOption("Notifications")
-            ProfileOption("Privacy & Security")
+            ProfileOption("Set Watch Movie Notifications") {
+                context.startActivity(
+                    Intent(context, SetReminderActivity::class.java)
+                )
+            }
 
+            ProfileOption("Account Settings") {
+                context.startActivity(
+                    Intent(context, AccountSettingsActivity::class.java)
+                )
+            }
             Spacer(modifier = Modifier.height(40.dp))
 
             // --- Logout Button ---
@@ -537,12 +530,13 @@ fun ProfileUI(
 }
 
 @Composable
-fun ProfileOption(label: String) {
+fun ProfileOption(label: String, onClick: () -> Unit = {}) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 10.dp)
             .background(Color(0xFF1A1A1A), RoundedCornerShape(12.dp))
+            .clickable { onClick() }
             .padding(16.dp)
     ) {
         Text(
@@ -552,3 +546,4 @@ fun ProfileOption(label: String) {
         )
     }
 }
+
