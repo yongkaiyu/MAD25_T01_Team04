@@ -185,6 +185,10 @@ class CommentViewModel(private val repo: CommentRepository) : ViewModel() {
         }
     }
 
+    fun sync() {
+        viewModelScope.launch { repo.sync() }
+    }
+
     // Automatically fetches and caches data, keeps View component free of data-fetch logic
     init {
         viewModelScope.launch { repo.sync() }
