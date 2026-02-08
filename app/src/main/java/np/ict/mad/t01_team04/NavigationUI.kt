@@ -22,6 +22,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
+import androidx.compose.material.icons.filled.Casino
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.PlayArrow
@@ -183,6 +184,10 @@ fun MAD25_T01_Team04App(viewModel: ContentViewModel, commentViewModel: CommentVi
                             viewModel = viewModel,
                             onItemClick = { id -> currentContentId = id }
                         )
+                        AppDestinations.DAILY -> DailyMysteryScreen(
+                            viewModel = viewModel,
+                            commentViewModel = commentViewModel
+                        )
                         AppDestinations.REVIEW -> ReviewScreen(viewModel = viewModel, commentViewModel = commentViewModel)
                         AppDestinations.PROFILE -> ProfileUI(
                             username = "GuestUser",
@@ -213,6 +218,8 @@ enum class AppDestinations(
     HOME("Home", Icons.Default.Home),
 
     MOVIES("Movies", Icons.Default.PlayArrow),
+
+    DAILY("Mystery", Icons.Default.Casino),
 
     REVIEW("Review", Icons.Default.ThumbUp),
 

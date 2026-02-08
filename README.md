@@ -60,8 +60,8 @@ Planned Tasks and Feature Allocation for each member in Stage 2
 - Review Page and Functions (Kai Yu)
 - Delete comment
 - Comment under the content page for each movie
-- Comment top comments when there are no movie selected
-- Daily Mystery Movie
+- Comment top comments when there are no movie selected 
+- Daily Mystery Movie (Jian Hui)
 
 Application Description
 - CineXplorer is a discovery mobile application targeted towards movies. CineXplorer through its innovative features helps
