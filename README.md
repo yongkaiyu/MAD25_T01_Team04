@@ -1191,13 +1191,6 @@ Accessibility considerations
     - Diverse User Need Addressed: Dark-themed UI with high contrast text and icons support users with low vision.
     - Diverse User Need Addressed: Critical actions (submit,delete,and edit) use color with iconography instead of just color, preventing reliance on color distinctions.
 
-## Feature overview (Daily Mystery Movie) - Jian Hui
-
-- **Daily Random Movie**: A new movie is randomly selected every day, giving users a fresh recommendation each time they visit the page.
-- **Date-Based Selection**: The movie selection is tied to the current date, ensuring that all users see the same movie on the same day.
-- **"Change Date" Button**: A "Change Date" button allows users to simulate the passing of a day, making it easy to see how the movie selection changes over time.
-- **Back Navigation**: The back button navigates the user to the "Movies" page, providing a seamless user experience.
-
 
 
 Watch List Feature - Nur Sarrinah Sazali
