@@ -46,7 +46,8 @@ import kotlin.math.roundToInt
 @Composable
 fun ReviewScreen(
     viewModel: ContentViewModel,
-    commentViewModel: CommentViewModel) {
+    commentViewModel: CommentViewModel
+) {
 
     // Load movie list from Room/Firestore
     val movieList by viewModel.contentList.collectAsState()
