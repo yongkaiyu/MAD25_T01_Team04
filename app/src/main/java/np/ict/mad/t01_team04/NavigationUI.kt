@@ -367,16 +367,6 @@ fun CommentItem(
                 )
             }
         }
-
-        /* ReadOnlyStarRating(rating = comment.rating)
-
-        Spacer(modifier = Modifier.height(4.dp))
-
-        Text(
-            text = comment.comment,
-            color = Color.White,
-            fontSize = 15.sp
-        ) */
     }
 
     // Confirmation Dialog
