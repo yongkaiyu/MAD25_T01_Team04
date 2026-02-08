@@ -85,6 +85,15 @@ class NavigationUI : ComponentActivity() {
 
         val commentDao = database.commentDao()
 
+        val watchedDao = database.watchedDao()
+
+        val watchedRepo = WatchedRepository(watchedDao)
+
+        val watchedFactory = WatchedViewModelFactory(watchedRepo)
+
+        val watchedViewModel = ViewModelProvider(this, watchedFactory)
+            .get(WatchedViewModel::class.java)
+
         // --- Firestore ---
         val firebase = FirebaseFirestore.getInstance()
 
@@ -106,7 +115,7 @@ class NavigationUI : ComponentActivity() {
         setContent {
             MAD25_T01_Team04Theme {
                 MAD25_T01_Team04App(
-                    viewModel, commentViewModel)
+                    viewModel, commentViewModel, watchedViewModel)
             }
         }
     }
@@ -114,7 +123,7 @@ class NavigationUI : ComponentActivity() {
 
 //@PreviewScreenSizes
 @Composable
-fun MAD25_T01_Team04App(viewModel: ContentViewModel, commentViewModel: CommentViewModel) {
+fun MAD25_T01_Team04App(viewModel: ContentViewModel, commentViewModel: CommentViewModel, watchedViewModel: WatchedViewModel) {
 
     var isLoggedIn by rememberSaveable { mutableStateOf(true) }
 
@@ -173,12 +182,12 @@ fun MAD25_T01_Team04App(viewModel: ContentViewModel, commentViewModel: CommentVi
                         contentId = currentContentId!!,
                         viewModel = viewModel,
                         commentViewModel = commentViewModel,
+                        watchedViewModel = watchedViewModel,
                         onBack = { currentContentId = null }
-
                     )
                 } else {
                     when (currentDestination) {
-                        AppDestinations.HOME -> Home()
+                        AppDestinations.HOME -> Home(watchedViewModel)
                         AppDestinations.MOVIES -> Movies(
                             viewModel = viewModel,
                             onItemClick = { id -> currentContentId = id }
