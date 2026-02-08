@@ -7,6 +7,8 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -59,9 +61,13 @@ fun AccountSettingsScreen(onBack: () -> Unit) {
         OutlinedTextField(
             value = displayName,
             onValueChange = { displayName = it },
-            label = { Text("Display Name") },
-            modifier = Modifier.fillMaxWidth()
+            label = { Text("Display Name", color = Color.LightGray) },
+            textStyle = TextStyle(color = Color.White),
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color.DarkGray.copy(alpha = 0.2f))
         )
+
 
         Spacer(modifier = Modifier.height(12.dp))
 
@@ -92,8 +98,11 @@ fun AccountSettingsScreen(onBack: () -> Unit) {
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
-            label = { Text("Email Address") },
-            modifier = Modifier.fillMaxWidth()
+            label = { Text("Email Address", color = Color.LightGray) },
+            textStyle = TextStyle(color = Color.White),
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color.DarkGray.copy(alpha = 0.2f))
         )
 
         Spacer(modifier = Modifier.height(12.dp))
@@ -129,9 +138,12 @@ fun AccountSettingsScreen(onBack: () -> Unit) {
         OutlinedTextField(
             value = newPassword,
             onValueChange = { newPassword = it },
-            label = { Text("New Password") },
+            label = { Text("New Password", color = Color.LightGray) },
+            textStyle = TextStyle(color = Color.White),
             visualTransformation = PasswordVisualTransformation(),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color.DarkGray.copy(alpha = 0.2f))
         )
 
         Spacer(modifier = Modifier.height(12.dp))

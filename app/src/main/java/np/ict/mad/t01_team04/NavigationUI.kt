@@ -490,16 +490,17 @@ fun ProfileUI(
             Spacer(modifier = Modifier.height(30.dp))
 
             // --- Settings List ---
-            ProfileOption("Saved Movies")
-            ProfileOption("My Watchlist")
+            ProfileOption("Set Watch Movie Notifications") {
+                context.startActivity(
+                    Intent(context, SetReminderActivity::class.java)
+                )
+            }
+
             ProfileOption("Account Settings") {
                 context.startActivity(
                     Intent(context, AccountSettingsActivity::class.java)
                 )
             }
-            ProfileOption("Notifications")
-            ProfileOption("Privacy & Security")
-
             Spacer(modifier = Modifier.height(40.dp))
 
             // --- Logout Button ---
