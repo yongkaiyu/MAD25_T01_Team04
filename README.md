@@ -478,6 +478,396 @@ Firebase + Room sync logic
             ↓
         UI updates instantly
 
+Error Handling
+
+    The feature was designed with user-safe interactions to prevent crashes, preserve data consistency
+    between Firestore and Room, and avoid destructive mistakes. Error handling has been implemented
+    at validation, ownership/authorization checks, and data-layer recovery
+
+    1. Input Validation and Safe Submission (UI-Level Guardrails)
+
+    To prevent invalid or incomplete reviews from being stored, the UI enforces validation before triggering any database write:
+
+    - Empty comment text is blocked
+
+    - Rating = 0 is blocked
+
+    - Submit button is disabled unless the form is valid
+
+    After successful submission, input fields reset (commentText = "", rating = 0) to prevent accidental duplicate posting
+
+    This ensures the backend never receives invalid payloads and reduces error frequency and edge-case states.
+
+    2. Authentication and Ownership Enforcement (Authorization Safety)
+
+    All comment modifications are tied to Firebase Authentication:
+
+    - Create requires a logged-in user (FirebaseAuth.getInstance().currentUser != null)
+
+    - Edit/Delete are restricted to the comment owner:
+
+        - Each comment stores userId
+
+        - UI checks: isOwner = (comment.userId == currentUser.uid)
+
+        - Only owners of own comment can see edit/delete controls, preventing unauthorized actions from the UI
+
+    If the session is missing or invalid, the action exits early (no crash)
+
+    3. Destructive Action Protection (Delete Confirmation)
+
+    Deleting a comment is irreversible and could happen accidentally on touch devices, so it uses a confirmation step:
+
+    - Tapping delete opens an AlertDialog
+
+    - Only on confirm does the delete call execute
+
+    - Cancel dismisses without changes
+
+    This protects users from accidental data loss and satisfies “comprehensive UX handling” for destructive actions.
+    
+    4. Firestore Write Failures (Network/Backend Errors)
+
+    Firestore operations (add/update/delete) can fail due to:
+
+        - No network / unstable network
+
+        - Permission rules rejection
+
+        - Server issues
+
+    To handle this safely:
+
+        - Repository functions return success/failure
+
+        - Exceptions are caught using try/catch to prevent crashes
+
+        - Failure does not wipe local UI state; user input remains available for retry
+
+        - Errors are logged for debugging (Log.e(...))
+
+    This prevents app termination and avoids leaving the user in an unclear state.
+
+    5. Sync Reliability and Cache Consistency (Firestore ↔ Room)
+
+    The feature uses a Room cache to ensure the UI remains stable and predictable:
+
+    - UI reads from Room Flow, not directly from Firestore
+
+    - After a successful create/update/delete:
+
+        - Repository triggers a sync refresh (repo.sync())
+
+        - Room is updated, and UI refreshes automatically through Flow collection
+
+    This architecture reduces “UI flicker” and ensures a consistent source of truth for display.
+
+    6. Timestamp Type Safety (Avoiding Runtime Type Errors)
+
+    A known failure mode in Firestore is mismatched field types (e.g., Timestamp vs Long). 
+
+    This was handled by:
+
+        - Normalizing timestamp handling in mapping logic
+
+        - Converting Firestore timestamps into a consistent local representation
+
+        - Ensuring Room stores timestamp in a stable format to support sorting without crashes
+
+    This prevents runtime errors like:
+
+        - “Field 'timestamp' is not a com.google.firebase.Timestamp”
+
+    7. Edit Mode Safety (Preventing Corruption and Accidental Updates)
+
+    When editing, the feature maintains separate state:
+
+    - isEditing
+
+    - editedText
+
+    - editedRating
+
+    Only when the user confirms (Save) does the update action execute. Cancel returns to the original display state without touching Firestore or Room. This prevents partial edits and maintains data integrity.
+
+    Summary
+    
+    Errors handled:
+
+    - Blocking invalid input before writes
+
+    - Ensuring only authenticated owners can edit/delete
+
+    - Confirming destructive actions
+
+    - Catching Firestore failures without crashing
+
+    - Maintaining UI consistency using Room cache as display source
+
+    - Handling timestamp typing safely
+
+    - Preventing partial edit states from corrupting stored data
+    
+    This results in a user-safe, stable feature that behaves predictably even under failure conditions like network loss, invalid states, and ownership constraints.
+
+Design Decisions
+
+    1. Firestore + Room vs Firestore only
+    
+    Decision: Use Firestore as remote source and Room as local cache, with UI reading from Room
+
+    Why:
+
+    - Prevents UI from breaking when network is unstable
+
+    - Improves perceived performance (instant loads from local DB)
+
+    - Supports consistent rendering with Compose Flows (less flicker)
+
+    - Enables predictable sorting/filtering locally (timestamp DESC)
+    
+    - Aligns with existing content database (movie DB)
+
+    Trade-off:
+
+    - Higher complexity (sync logic, mapping, cache invalidation)
+
+    - Must handle consistency issues (e.g., stale cache, delete propagation)
+
+    Mitigation:
+
+    - Sync is triggered after add/update/delete and at ViewModel init
+
+    - Room uses REPLACE upsert strategy to keep cache aligned
+
+    2. Room as UI Source of Truth vs Firestore Snapshot as UI Source of Truth
+
+    Decision: Treat Room as the UI source of truth, not direct Firestore listeners.
+
+    Why:
+
+    - Compose UI stays stable: Room Flow emits consistent updates
+
+    - Avoids “loading flicker” and transient empty states during network refresh
+
+    - Simplifies UI logic (one observer source)
+
+    Trade-off:
+
+    - “Real-time” updates are limited by sync strategy
+
+    - If not using Firestore addSnapshotListener, UI isn’t truly live
+
+    Mitigation:
+
+    - Manual sync is executed after write operations
+
+    3. Store rating as Integer (1–5) vs Float/Double
+
+    Decision: Store rating as an integer.
+
+    Why:
+
+    Matches UI star selection naturally
+
+    - Reduces rounding errors and inconsistent displays
+
+    - Simplifies validation (“rating > 0”) and aggregation logic
+
+    Trade-off:
+
+    - No half-stars (e.g., 4.5)
+
+    - Less granular user feedback
+
+    Mitigation:
+
+    - Average rating is computed as a double for display (e.g., 3.7 / 5)
+
+    - UI shows filled stars based on rounded average, plus numeric value
+
+    4. Ownership-based UI Control vs Backend-only Enforcement
+
+    Decision: Hide edit/delete controls in UI unless the user owns the comment.
+
+    Why:
+
+    - Prevents confusing UI (users don’t see options they can’t use)
+
+    - Reduces accidental unauthorized operations
+
+    - Enhances perceived security and user trust
+
+    Trade-off:
+
+    - UI-only enforcement is not sufficient security by itself
+
+    Mitigation:
+
+    - Recommended Firestore rules: only allow update/delete when userID matches
+
+    - UI enforcement is used for UX, backend enforcement for security
+
+    5. Confirmation Dialog for Delete vs One-tap Delete
+
+    Decision: Require confirmation before deleting comments.
+
+    Why:
+
+    - Touch interfaces are error-prone
+
+    - Deletes are destructive and irreversible
+
+    - Aligns with usability testing feedback (fear of accidental deletion)
+
+    Trade-off:
+
+    - Slightly slower workflow for power users
+
+    Mitigation:
+
+    Dialog is lightweight and consistent with Material patterns
+
+    6. Edit-in-place Mode vs Separate Edit Screen
+
+    Decision: Edit comments inline within the comment item.
+
+    Why:
+
+    - Reduces navigation complexity
+
+    - Keeps user context visible (movie + other comments)
+
+    - Faster interaction for small edits
+
+    Trade-off:
+
+    - More UI state complexity per comment (editing state, text state, rating state)
+
+    - Potential recomposition costs if not carefully scoped
+
+    Mitigation:
+
+    - Local state only within CommentItem
+
+    - Only one item enters edit mode at a time
+
+    7. Storing Timestamp as Long Locally vs Firestore Timestamp Everywhere
+
+    Decision: Store timestamp as Firestore Timestamp in Firestore, but as Long (epoch millis) in Room.
+
+    Why:
+
+    - Room works cleanly with Long for sorting and queries
+
+    - Avoids type mismatch crashes when mapping from Firestore
+
+    - Simplifies formatting and ordering in local queries
+
+    Trade-off:
+
+    - Requires conversion at the boundary (Firestore → entity)
+
+    - Must standardize mapping to avoid inconsistencies
+
+    Mitigation:
+
+    - Centralized mapping inside repository sync functions
+
+    - Local DB always uses a consistent numeric time representation
+
+    8. Document ID Strategy (Firestore auto-id) vs Client-generated IDs
+
+    Decision: Use Firestore auto-id for documents, but store the returned ID into Room (and keep it stable).
+
+    Why:
+
+    - Firestore auto-id is reliable and avoids collisions
+
+    - Room requires a stable primary key for upserts and ownership operations
+
+    - Enables deletion/update by ID
+
+    Trade-off:
+
+    - When generating local IDs and Firestore generates another ID, they must be reconciled
+
+    Mitigation:
+
+    - Use Firestore document ID as the canonical id
+
+    - After adding, retrieve the id from database to resync with Room
+
+    Summary:
+
+    These decisions improved:
+    
+    - Reliability: stable UI even with network issues
+
+    - Maintainability: MVVM separation, repository centralization
+
+    - Usability: safe deletes, clear ownership rules, inline edit workflow
+
+    - Consistency: correct star rendering, predictable cached data behavior
+
+    However some tradeoffs are:
+    
+    - More sync complexity (Firestore + Room)
+    
+    - Average Rating Accuracy depends on loaded dataset
+
+Performance Optimization
+
+    1. Room-first Rendering (Fast UI + Less Network)
+
+    Optimization: The comments UI displays data from Room (Flow), not directly from Firestore.
+
+    Why it improves performance:
+
+    - Comments load instantly from local cache (no waiting for network)
+
+    - Minimizes UI “loading flicker” and empty-state flashes
+
+    - Reduces repeated Firestore reads when revisiting the same movie details screen
+
+    2. Movie-Scoped Comment Queries (Avoid Loading Everything)
+
+    Optimization: Fetch and display only comments for the selected movieId, using:
+
+    - dao.getCommentsForMovie(movieId)
+
+    Why it improves performance:
+
+    - Smaller datasets = faster database reads and faster Compose rendering
+
+    - Prevents large LazyColumn performance degradation as comments grow
+
+    3. Sync Strategy to Reduce Network Load
+
+    Optimization: Sync occurs:
+
+        - on screen init
+
+        - after create/update/delete
+
+    Why it improves performance:
+
+    - Avoids continuous network listeners
+
+    - Ensures Room cache stays up-to-date after user actions
+
+    Summary
+    
+    Performance is optimized by:
+
+    - Room-first rendering (fast and stable UI)
+
+    - Movie-scoped loading (small datasets)
+
+    - sync-on-demand (controlled network usage)
+
+
+Testing & Validation
 
 User Guide (how to comment, edit, delete)
 
