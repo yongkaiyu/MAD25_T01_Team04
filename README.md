@@ -869,6 +869,255 @@ Performance Optimization
 
 Testing & Validation
 
+    Goals
+
+    1. Verify end-to-end flows:
+
+        - Select movie → view comments → add comment + rating → live refresh
+
+    2. Validate data integrity across layers:
+
+        - Firestore stores correct fields and types
+
+        - Room cache updates correctly after sync
+
+    3. Ensure ownership-based constraints:
+
+        - Only comment owner can edit/delete
+
+    4. Validate UX and stability:
+
+        - No crashes, no duplicate comments, correct star rendering
+
+    5. Validate resilience:
+
+        - Offline behavior and recovery
+
+        - Error handling under failure condition
+
+    Testing Methods Used
+
+    - Manual functional testing (scripted test cases)
+
+    - Regression testing after fixes (rating UI, timestamp mapping, flicker)
+
+    - Usability validation (8+ participants performing tasks)
+
+    - Failure injection tests (invalid input)
+
+    1. Create Comment + Rating Test
+    
+    Objective: Verify a valid comment is written to Firestore, synced to Room, and displayed.
+
+    (Movie Details Way)
+
+    Steps
+    
+    1. Login as admin
+    2. Open movie details for Big Buck Bunny
+    3. Select rating = 4 stars
+    4. Enter comment = "Great pacing"
+    5. Tap "Post"
+
+    Expected
+    - Firestore adds a new doc in comment
+
+    - UI displays new comment without app restart
+
+    - Room cache reflects new entry after sync
+
+    - Average rating updates correctly
+
+    Result: Pass
+
+    (Comment Page Way)
+
+    Steps
+    
+    1. Login as admin2
+    2. Open Review Page
+    3. Select Shrek
+    4. Select rating = 5 stars
+    4. Enter comment = "Superb pacing"
+    5. Tap "Post"
+
+    Expected
+
+    - Firestore adds a new doc in comment
+
+    - UI displays new comment without app restart
+
+    - Room cache reflects new entry after sync
+
+    - Average rating updates correctly
+
+    Result: Pass
+    
+    2. Input Validation Test
+
+    - Test 1: Rating Missing
+
+        Steps: Enter comment text, keep rating = 0, try submit
+        Expected: Submit disabled / blocked
+        Result: Pass
+
+    - Test 2: Comment Blank
+
+        Steps: Choose rating, comment empty, try submit
+        Expected: Submit disabled / blocked
+        Result: Pass
+    
+    3. Ownership Enforcement (Security & UX)
+
+    Test 1: Owner Sees Controls
+
+        Steps: admin views their own comment
+        Expected: Edit/delete options visible
+        Result: Pass
+
+    Test 2: Non-owner Does Not See Controls
+
+        Steps: Login as admin2, view admin comments
+        Expected: No edit/delete controls shown
+        Result: Pass
+
+    4. Delete Validation (Destructive Action Safety)
+
+    Test 1: Confirm Delete
+
+        Steps: Owner taps delete → confirm
+        Expected:
+            - Comment removed from Firestore
+            - Sync updates Room
+            - UI removes comment after refresh
+        Result: Pass
+
+    Test 2: Cancel Delete
+
+        Steps: Owner taps delete → cancel
+        Expected: Comment remains unchanged
+        Result: Pass
+    
+    5. Edit Validation (Update Correctness)
+
+    Test 1: Edit Comment Text
+
+        Steps: Owner enters edit mode → changes text → save
+        Expected: Firestore updates; UI shows updated text; Room updated after sync
+        Result: Pass
+
+    Test 2: Edit Rating
+
+        Steps: Change rating 2→5 → save
+        Expected: UI star display updates correctly and persists after restart
+        Result: Pass
+
+    Test 3: Cancel Edit
+        
+        Steps: Change rating 5→3 → cancel 
+        Expected: UI returns to original text/rating without Firestore write
+        Result: Pass
+
+    5. Data Integrity Validation (Firestore ↔ Room Consistency)
+
+    This section verifies the same data is consistently represented across Firestore, Room, and UI.
+
+    Checks Performed
+
+        - After add/edit/delete:
+
+            - verify Firestore document fields exist and types are correct
+
+        - After sync:
+
+            - verify Room contains the updated comment list
+
+        - UI reads only from Room Flow:
+
+            - ensures stable UI even under poor network
+
+        Key Assertions
+
+        - movieId stored matches selected movie document id
+
+        - userId stored equals Firebase current user uid
+
+        - rating stored as integer 1..5
+
+        - Sorting by timestamp desc is correct in UI
+
+        - Average rating matches computed values from the comment list
+
+        Result: Pass
+
+    6. Network Failure & Recovery Testing (Resilience)
+
+        Test 1: Offline Read (Cached Comments)
+
+            Steps
+                - Load Movie A comments while online
+                - Turn off network
+                - Return to Movie A detail screen
+            Expected
+                - Comments still display from Room
+                - No crash; no infinite loader
+            Result: Pass
+
+        Test 2: Offline Submit (Failure Injection)
+
+            Steps
+                - Turn off network
+                - Try submit comment
+            Expected
+                - Firestore write fails gracefully (no crash)
+                - App saves in Room
+                - UI does not show phantom comment
+            Result: Pass
+        Test 3: Recovery after Reconnect
+            
+            Steps
+                - Turn network back on
+                - Re-open screen / trigger sync
+            Expected
+                - Sync completes
+                - UI and Room reflect Firestore latest state
+                - Comment made offline now in Firestore
+            Result: Pass
+    
+    7. Regression Testing
+        The following bugs were found during testing and fixed, then re-tested:
+
+        1. Star display bug (always showed 5 stars)
+
+            Root cause: incorrect UI logic/mapping
+            Fix: ensure filled condition uses index < rating consistently
+            Regression: Verified ratings 1..5 render accurately
+
+        2. Timestamp type mismatch (Timestamp vs Long)
+
+            Root cause: Firestore field type mismatch during mapping
+            Fix: consistent conversion layer in repository
+            Regression: Verified sorting order stable\
+
+    8. UX Consistency Validation
+
+        A consistent UX across all interactions by:
+            - The submit button state always reflects validity (comment text + rating)
+            - Edit mode clearly differentiates from view mode
+            - Delete uses confirmation dialog for double checking
+        
+        Result: Pass
+
+    Summary
+        
+        This testing demonstrates:
+            - Correctness of CRUD operations
+            - Correct ratings rendering and aggregation
+            - Correct ownership enforcement
+            - Stable UI behavior under recomposition
+            - Room cache reliability for offline viewing
+            - Debugging, iteration, and regression testing
+
 User Guide (how to comment, edit, delete)
 
     1. How to add a comment on the Review Page
