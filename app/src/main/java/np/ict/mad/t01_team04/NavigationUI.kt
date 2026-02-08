@@ -22,10 +22,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.AlertDialog
@@ -185,9 +186,11 @@ fun MAD25_T01_Team04App(viewModel: ContentViewModel, commentViewModel: CommentVi
                             viewModel = viewModel,
                             onItemClick = { id -> currentContentId = id }
                         )
+                        AppDestinations.SEARCH -> Text("Search Screen", color = Color.White)
                         AppDestinations.DAILY -> DailyMysteryScreen(
                             viewModel = viewModel,
-                            commentViewModel = commentViewModel
+                            commentViewModel = commentViewModel,
+                            onBack = { currentDestination = AppDestinations.MOVIES }
                         )
                         AppDestinations.REVIEW -> ReviewScreen(viewModel = viewModel, commentViewModel = commentViewModel)
                         AppDestinations.PROFILE -> ProfileUI(
@@ -220,7 +223,9 @@ enum class AppDestinations(
 
     MOVIES("Movies", Icons.Default.PlayArrow),
 
-    DAILY("Mystery", Icons.Default.Search),
+    SEARCH("Search", Icons.Default.Search),
+
+    DAILY("Mystery", Icons.Default.Lightbulb),
 
     REVIEW("Review", Icons.Default.ThumbUp),
 
@@ -367,6 +372,16 @@ fun CommentItem(
                 )
             }
         }
+
+        /* ReadOnlyStarRating(rating = comment.rating)
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Text(
+            text = comment.comment,
+            color = Color.White,
+            fontSize = 15.sp
+        ) */
     }
 
     // Confirmation Dialog
