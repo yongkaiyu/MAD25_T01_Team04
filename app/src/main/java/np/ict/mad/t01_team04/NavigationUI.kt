@@ -22,10 +22,11 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Lightbulb
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.AlertDialog
@@ -60,6 +61,8 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.room.Room
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.auth.FirebaseAuth
+import android.content.Intent
+import androidx.compose.ui.platform.LocalContext
 
 
 
@@ -185,9 +188,11 @@ fun MAD25_T01_Team04App(viewModel: ContentViewModel, commentViewModel: CommentVi
                             viewModel = viewModel,
                             onItemClick = { id -> currentContentId = id }
                         )
+                        AppDestinations.SEARCH -> Text("Search Screen", color = Color.White)
                         AppDestinations.DAILY -> DailyMysteryScreen(
                             viewModel = viewModel,
-                            commentViewModel = commentViewModel
+                            commentViewModel = commentViewModel,
+                            onBack = { currentDestination = AppDestinations.MOVIES }
                         )
                         AppDestinations.REVIEW -> ReviewScreen(viewModel = viewModel, commentViewModel = commentViewModel)
                         AppDestinations.PROFILE -> ProfileUI(
@@ -220,7 +225,9 @@ enum class AppDestinations(
 
     MOVIES("Movies", Icons.Default.PlayArrow),
 
-    DAILY("Mystery", Icons.Default.Search),
+    SEARCH("Search", Icons.Default.Search),
+
+    DAILY("Mystery", Icons.Default.Lightbulb),
 
     REVIEW("Review", Icons.Default.ThumbUp),
 
@@ -367,6 +374,16 @@ fun CommentItem(
                 )
             }
         }
+
+        /* ReadOnlyStarRating(rating = comment.rating)
+
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Text(
+            text = comment.comment,
+            color = Color.White,
+            fontSize = 15.sp
+        ) */
     }
 
     // Confirmation Dialog
@@ -429,27 +446,13 @@ fun isInEditMode(): Boolean {
     return LocalView.current.isInEditMode
 }
 
-/*@Composable
-fun Greeting2(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    MAD25_T01_Team04Theme {
-        Greeting2("Android2")
-    }
-}*/
 
 @Composable
 fun ProfileUI(
     username: String = "GuestUser",
     onLogout: () -> Unit = {}
 ) {
+    val context = LocalContext.current
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -500,12 +503,17 @@ fun ProfileUI(
             Spacer(modifier = Modifier.height(30.dp))
 
             // --- Settings List ---
-            ProfileOption("Saved Movies")
-            ProfileOption("My Watchlist")
-            ProfileOption("Account Settings")
-            ProfileOption("Notifications")
-            ProfileOption("Privacy & Security")
+            ProfileOption("Set Watch Movie Notifications") {
+                context.startActivity(
+                    Intent(context, SetReminderActivity::class.java)
+                )
+            }
 
+            ProfileOption("Account Settings") {
+                context.startActivity(
+                    Intent(context, AccountSettingsActivity::class.java)
+                )
+            }
             Spacer(modifier = Modifier.height(40.dp))
 
             // --- Logout Button ---
@@ -522,12 +530,13 @@ fun ProfileUI(
 }
 
 @Composable
-fun ProfileOption(label: String) {
+fun ProfileOption(label: String, onClick: () -> Unit = {}) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 10.dp)
             .background(Color(0xFF1A1A1A), RoundedCornerShape(12.dp))
+            .clickable { onClick() }
             .padding(16.dp)
     ) {
         Text(
@@ -537,3 +546,4 @@ fun ProfileOption(label: String) {
         )
     }
 }
+

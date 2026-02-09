@@ -1190,3 +1190,118 @@ Accessibility considerations
 
     - Diverse User Need Addressed: Dark-themed UI with high contrast text and icons support users with low vision.
     - Diverse User Need Addressed: Critical actions (submit,delete,and edit) use color with iconography instead of just color, preventing reliance on color distinctions.
+
+
+
+Watch List Feature - Nur Sarrinah Sazali
+
+For Stage 2 of the Mobile Application Development module, I implemented a Watch List (Watched Videos) feature that allows the application to automatically track and display content that users have viewed. This feature enhances user experience by reducing repeated content and helping users keep track of what they have already watched.
+
+The implementation demonstrates the use of Jetpack Compose, Room database, ViewModel architecture, and reactive UI updates, and fulfills the requirement of adding a new functional component with CRUD operations.
+
+Feature Overview: 
+
+The Watch List feature automatically records a video or movie as “watched” when the user views it for a short duration. Watched items are persistently stored and displayed on the Home page, where users can also remove items from the list.
+
+This feature works across app sessions and updates the UI in real time as data changes.
+
+Technical Implementation:
+Database Layer (Room)
+1. A new Room entity (WatchedEntity) was created to store watched content details such as:
+   - Content ID
+   - Title
+   - Thumbnail URL
+   - Timestamp of when the content was watched
+
+2. A corresponding DAO (WatchedDao) was implemented to support:
+   - Insert or update watched items
+   - Retrieve all watched items
+   - Delete watched items
+
+The existing AppDatabase was extended to include the new entity and DAO.
+This ensures watched content is persisted locally and survives app restarts.
+
+ViewModel and Repository:
+- A WatchedRepository was introduced to encapsulate data access logic.
+- A WatchedViewModel was created to:
+  - Expose the watched list as a reactive data stream
+  - Handle insertion and deletion operations
+- The ViewModel was injected into the application’s navigation flow to ensure proper lifecycle handling.
+
+This follows the MVVM architecture and keeps UI logic separate from data management.
+
+Automatic Watch Tracking Logic: 
+- On the Home screen, the app monitors which video is currently visible using Jetpack Compose’s paging state.
+- A short viewing delay (800 milliseconds) is applied before a video is marked as watched.
+This prevents accidental swipes from being recorded.
+- The logic is implemented using LaunchedEffect and coroutine delays, ensuring:
+  - Videos are only added after being viewed for a minimum duration
+  - Rapid swiping does not trigger unnecessary inserts
+
+User Interface Integration:
+- A new “Watched” section was added to the Home screen.
+- Watched items are displayed using a horizontally scrollable list (LazyRow).
+- Each item includes a delete option, allowing users to manually remove content from their watch list.
+
+The UI updates automatically whenever the underlying data changes.
+
+CRUD Operations Demonstrated: 
+The Watch List feature demonstrates full CRUD functionality:
+- Create:
+  Content is automatically added to the watch list after being viewed.
+- Read:
+  Watched content is displayed on the Home screen.
+- Delete:
+  Users can remove items from the watch list.
+- Update:
+  Existing entries are safely replaced if the same content is re-watched.
+
+Relevance to Stage 2 Requirements: 
+This feature satisfies Stage 2 requirements by:
+- Introducing a new functional feature
+- Applying Room database persistence
+- Using ViewModel and reactive state management
+- Integrating cleanly with an existing group codebase
+- Demonstrating meaningful user interaction logic
+The Watch List feature was designed and implemented independently, while aligning with the overall application structure and design.
+
+
+
+## Feature overview (Daily Mystery Movie) - Jian Hui
+
+- **Daily Random Movie**: A new movie is randomly selected every day, giving users a fresh recommendation each time they visit the page.
+- **Date-Based Selection**: The movie selection is tied to the current date, ensuring that all users see the same movie on the same day.
+- **"Change Date" Button**: A "Change Date" button allows users to simulate the passing of a day, making it easy to see how the movie selection changes over time.
+- **Back Navigation**: The back button navigates the user to the "Movies" page, providing a seamless user experience.
+
+Features Implemented - Nagu Adhavan Tabio
+1. Notification Reminder System
+
+users can set a reminder for a movie, which triggers a notification at a selected date and time.
+
+Reminders use AlarmManager and NotificationManager for exact or inexact alarms depending on device permissions.
+
+Features include:
+
+Default 10-second reminder for testing
+
+Option to select a future date and time
+
+Validation to prevent reminders in the past
+
+Each reminder is unique and survives app restarts.
+
+
+Relevance to Stage 2 Requirements
+
+This feature satisfies Stage 2 requirements by:
+
+Introducing a new functional feature
+
+Handling user interaction and input validation
+
+Integrating cleanly with an existing group codebase
+
+Demonstrating meaningful application logic for notifications and reminders
+
+The Watchlist feature was designed and implemented independently, while aligning with the overall application structure and design.

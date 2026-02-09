@@ -19,11 +19,13 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
@@ -51,6 +53,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Date
 import java.util.Locale
 import kotlin.math.roundToInt
 
@@ -58,19 +61,23 @@ import kotlin.math.roundToInt
 @Composable
 fun DailyMysteryScreen(
     viewModel: ContentViewModel,
-    commentViewModel: CommentViewModel
+    commentViewModel: CommentViewModel,
+    onBack: () -> Unit
 ) {
     var selectedMysteryMovie by remember { mutableStateOf<ContentEntity?>(null) }
     var isLoading by remember { mutableStateOf(true) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    var currentDate by remember { mutableStateOf(Calendar.getInstance().time) }
 
     val allMovies by viewModel.contentList.collectAsState()
 
     // Load the daily mystery movie on composition
-    LaunchedEffect(allMovies) {
+    LaunchedEffect(allMovies, currentDate) {
         if (allMovies.isNotEmpty()) {
             try {
-                val mysteryMovie = getDailyMysteryMovie(allMovies)
+                isLoading = true // Show loader when date changes
+                commentViewModel.sync()
+                val mysteryMovie = getDailyMysteryMovie(allMovies, currentDate)
                 selectedMysteryMovie = mysteryMovie
                 isLoading = false
             } catch (e: Exception) {
@@ -110,7 +117,9 @@ fun DailyMysteryScreen(
             DailyMysteryContent(
                 movie = selectedMysteryMovie!!,
                 viewModel = viewModel,
-                commentViewModel = commentViewModel
+                commentViewModel = commentViewModel,
+                onBack = onBack,
+                onChangeDate = { currentDate = Calendar.getInstance().apply { time = currentDate; add(Calendar.DATE, 1) }.time }
             )
         }
     }
@@ -121,9 +130,14 @@ fun DailyMysteryScreen(
 fun DailyMysteryContent(
     movie: ContentEntity,
     viewModel: ContentViewModel,
-    commentViewModel: CommentViewModel
+    commentViewModel: CommentViewModel,
+    onBack: () -> Unit,
+    onChangeDate: () -> Unit
 ) {
-    val comments by commentViewModel.commentsForMovie(movie.id).collectAsState(initial = emptyList())
+    val commentsFlow = remember(movie.id) {
+        commentViewModel.commentsForMovie(movie.id)
+    }
+    val comments by commentsFlow.collectAsState(initial = emptyList())
     var commentText by remember { mutableStateOf("") }
     var rating by remember { mutableIntStateOf(0) }
 
@@ -143,193 +157,161 @@ fun DailyMysteryContent(
     ) {
         Spacer(modifier = Modifier.height(40.dp))
 
-        // Title
-        Text(
-            text = "Today's Mystery Movie",
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color(0xFF9B4DFF)
-        )
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        // Movie Thumbnail
-        val painter = rememberAsyncImagePainter(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data(movie.thumbnailUrl)
-                .crossfade(true)
-                .build()
-        )
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(280.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(Color.DarkGray)
-        ) {
-            Image(
-                painter = painter,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize()
-            )
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Movie Title
-        Text(
-            text = movie.title,
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
-            color = Color.White
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Movie Subtitle/Tag
-        Text(
-            text = movie.tag,
-            fontSize = 14.sp,
-            color = Color.Gray
-        )
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // Average Rating Display
-        Text(
-            text = "Community Rating",
-            color = Color.White,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.SemiBold
-        )
-
+        // Header with Back and Change Date buttons
         Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            repeat(5) { index ->
+            // Back Button
+            IconButton(
+                onClick = { onBack() },
+                modifier = Modifier
+                    .size(40.dp)
+                    .background(Color.DarkGray.copy(alpha = 0.6f), shape = CircleShape)
+            ) {
                 Icon(
-                    imageVector = Icons.Filled.Star,
-                    contentDescription = null,
-                    tint = if (index < averageRating.roundToInt())
-                        Color(0xFFFFC107)
-                    else
-                        Color.Transparent,
-                    modifier = Modifier.size(20.dp)
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = "Back",
+                    tint = Color.White
                 )
             }
 
-            Spacer(modifier = Modifier.size(8.dp))
-
-            Text(
-                text = String.format("%.1f / 5", averageRating),
-                color = Color.White,
-                fontSize = 12.sp
-            )
-
-            Text(
-                text = " (${comments.size} reviews)",
-                color = Color.Gray,
-                fontSize = 12.sp
-            )
-        }
-
-        Spacer(modifier = Modifier.height(12.dp))
-
-        // Movie Description
-        Text(
-            text = movie.description,
-            fontSize = 14.sp,
-            color = Color.White,
-            maxLines = 3
-        )
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        // Comment Section Header
-        Text(
-            text = "Your Rating & Comment",
-            color = Color.White,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.SemiBold
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Star Rating Selector
-        StarRatingSelector(
-            rating = rating,
-            onRatingSelected = { rating = it }
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Comment Input
-        OutlinedTextField(
-            value = commentText,
-            onValueChange = { commentText = it },
-            placeholder = { Text("Share your thoughts...") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(80.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedTextColor = Color.White,
-                unfocusedTextColor = Color.White,
-                focusedBorderColor = Color.White,
-                unfocusedBorderColor = Color.Gray,
-                focusedPlaceholderColor = Color.Gray,
-                unfocusedPlaceholderColor = Color.Gray
-            )
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Submit Button
-        Button(
-            onClick = {
-                val user = FirebaseAuth.getInstance().currentUser ?: return@Button
-
-                commentViewModel.submitComment(
-                    CommentEntity(
-                        id = "",
-                        userId = user.uid,
-                        userName = user.displayName ?: "Anonymous",
-                        movieId = movie.id,
-                        movieName = movie.title,
-                        comment = commentText,
-                        rating = rating,
-                        timestamp = System.currentTimeMillis()
-                    )
-                )
-
-                commentText = ""
-                rating = 0
-            },
-            enabled = commentText.isNotBlank() && rating > 0,
-            modifier = Modifier.align(Alignment.End),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF9B4DFF))
-        ) {
-            Text("Post Comment")
+            // Change Date Button
+            Button(onClick = onChangeDate) {
+                Text(text = "Change Date")
+            }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Comments Title
-        Text(
-            text = "All Comments (${comments.size})",
-            color = Color.White,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Bold
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Comments List
+        // Comments of the respective movie
         LazyColumn(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+            // Movie details
+            item {
+                Column {
+                    // Name of movie
+                    Text(
+                        text = movie.title,
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // Use AsyncImagePainter explicitly
+                    val painter = rememberAsyncImagePainter(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(movie.thumbnailUrl)
+                            .crossfade(true)
+                            .build()
+                    )
+
+                    // Thumbnail of Movie
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(250.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(Color.DarkGray) // Background while loading
+                    ) {
+                        Image(
+                            painter = painter,
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    }
+
+                    // Movie Description
+                    Spacer(modifier = Modifier.height(12.dp))
+                    Text(
+                        text = movie.description,
+                        fontSize = 16.sp,
+                        color = Color.White
+                    )
+
+                    Spacer(modifier = Modifier.height(20.dp))
+
+                    // Movie Rating
+                    Text(
+                        text = "Your Rating",
+                        color = Color.White,
+                        fontSize = 14.sp
+                    )
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    // Star Rating Selector
+                    StarRatingSelector(
+                        rating = rating,
+                        onRatingSelected = { rating = it }
+                    )
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    // Comment Input
+                    OutlinedTextField(
+                        value = commentText,
+                        onValueChange = { commentText = it },
+                        placeholder = { Text("Write a comment...") },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedTextColor = Color.White,
+                            unfocusedTextColor = Color.White,
+                            focusedBorderColor = Color.White,
+                            unfocusedBorderColor = Color.Gray
+                        )
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // Submit Comment Button
+                    Button(
+                        onClick = {
+                            val user = FirebaseAuth.getInstance().currentUser ?: return@Button
+
+                            commentViewModel.submitComment(
+                                CommentEntity(
+                                    id = "",
+                                    userId = user.uid,
+                                    userName = user.displayName ?: "Anonymous",
+                                    movieId = movie.id,
+                                    movieName = movie.title,
+                                    comment = commentText,
+                                    rating = rating,
+                                    timestamp = System.currentTimeMillis()
+                                )
+                            )
+
+                            commentText = ""
+                            rating = 0
+                        },
+                        enabled = commentText.isNotBlank() && rating > 0,
+                        modifier = Modifier.align(Alignment.End),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF9B4DFF))
+                    ) {
+                        Text("Submit Comment")
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Comment Display Title
+                    Text(
+                        text = "Comments",
+                        color = Color.White,
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold
+                    )
+
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+            }
+
+            // Comments List
             items(comments, key = { it.id }) { comment ->
                 CommentItem(
                     comment = comment,
@@ -345,17 +327,17 @@ fun DailyMysteryContent(
     }
 }
 
+
 // Get the daily mystery movie for the current day
 // Ensures all users see the same movie for the entire day
-fun getDailyMysteryMovie(movies: List<ContentEntity>): ContentEntity {
+fun getDailyMysteryMovie(movies: List<ContentEntity>, date: Date): ContentEntity {
     if (movies.isEmpty()) {
         throw IllegalArgumentException("No movies available")
     }
 
     // Get today's date in format YYYY-MM-DD
     val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-    val calendar = Calendar.getInstance()
-    val todayString = dateFormat.format(calendar.time)
+    val todayString = dateFormat.format(date)
 
     // Generate a seed based on today's date for consistency across all users
     val seed = todayString.hashCode().toLong()
